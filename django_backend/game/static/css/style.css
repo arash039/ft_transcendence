@@ -1,0 +1,229 @@
+
+#screen {
+    align-content: center;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+#header-welcome {
+    padding-bottom: 15vh;
+}
+
+#logo-big {
+    color: #ffffff;
+    font-size: 46pt;
+    font-family: "Monoton", sans-serif;;
+    text-transform: uppercase;
+    letter-spacing: 5pt;
+    margin: 0px;
+}
+
+#sublitle {
+    color: #ff56d8;
+    font-size: 16pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+}
+
+#header-game {
+    margin-top: 0px;
+    padding-top: 0px;
+    display: flex;
+    justify-content: center;
+
+    background-color: #2b2929;
+}
+
+#logo-small {
+    color: #ffffff;
+    font-size: 10pt;
+    font-family: "Monoton", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 5pt;
+    margin-top: -10px;
+    padding-top: 0px;
+
+}
+
+#one_player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#two_players,#tournament{
+    margin-top: 10px;
+}
+
+h1 {
+    color: #ffffff;
+    font-size: 40pt;
+    font-family: "Monoton", sans-serif;;
+    text-transform: uppercase;
+    letter-spacing: 5pt;
+}
+
+h2 {
+    color: #ff56d8;
+    font-size: 16pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+}
+
+h3 {
+    color: #ffffff;
+    font-size: 10pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+}
+
+.btn-group{
+    margin-top: -10px;
+}
+
+.btn-group-vertical {
+    width: 400px;
+}
+
+.btn-group-vertical > button{
+    margin-bottom:10px;
+    border-radius:10px !important;
+    border-width: 2px;
+}
+
+.rectangle {
+    display: flex;
+    justify-content: center;
+    height:fit-content;
+    border: 2px solid rgb(255, 255, 255);
+    /*background-color: #171616;*/
+  }
+
+.axis {
+    justify-content: center;
+    width: 1px;
+    height: 70vh;
+    border: 2px solid rgb(255, 255, 255);
+}
+
+#footer-welcome{
+    padding-top: 25vh;
+
+}
+
+#footer-game {
+    padding-top: 20px;
+    height: 10vh;
+}
+
+#name_form {
+    width: 400px;
+    margin: 100px auto; /* Centers the form horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the items within the form */
+    justify-content: center; /* Centers the form vertically */
+    text-align: center;
+}
+
+/* Basic game: */
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+} 
+  
+body { 
+    height: 100vh; 
+    width: 100vw; 
+    background-color: #232222; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.board { 
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center content vertically */
+    height: 80vh; 
+    width: 80vw; /* This ensures the width is 80% of the viewport width */
+    border: 2px solid rgb(255, 255, 255);
+    margin: auto; /* Center the board horizontally */
+    position: relative; /* Ensure proper positioning of child elements */
+}
+  
+.ball { 
+    height: 30px; 
+    width: 30px; 
+    border-radius: 50%; 
+    position: fixed; 
+    top: calc(50% - 15px); 
+    left: calc(50% - 15px); 
+    background-color: white;
+} 
+.paddle { 
+    height: 100px; 
+    width: 10px; 
+    position: fixed; 
+    background-color: white;
+} 
+  
+.paddle_1 { 
+    top: calc(7.5vh + 100px); 
+    left: calc(10vw + 10px);  /* Needs to be better calculated! */
+    background-color: rgb(31, 172, 237);
+} 
+  
+.paddle_2 { 
+    top: calc(85vh + 7.5vh - 100px - 50px); 
+    right: calc(10vw + 10px);   /* Needs to be better calculated! */
+    background-color: rgb(191, 43, 221);
+
+} 
+
+#scores {
+    top: calc(7.5vh + 70px); 
+    font-size: 30pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+}
+
+.player_1_score {
+    color: rgb(31, 172, 237);
+    position: fixed;
+    left: calc(100vw / 2 - 5vw);
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin: auto; /* Center the board horizontally */
+    z-index: 1; /* Ensure the score is on top of other elements */
+}
+
+.player_2_score {
+    color: rgb(191, 43, 221);
+    position: fixed;
+    right: calc(100vw / 2 - 5vw);
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin: auto; /* Center the board horizontally */
+    z-index: 1; /* Ensure the score is on top of other elements */
+}
+  
+.message { 
+    position: fixed; 
+    /* color: #48426d; */
+    color: #7d7fac; 
+    text-align: center;
+    top: calc(15vw); 
+    margin: 30px auto auto auto; 
+}
