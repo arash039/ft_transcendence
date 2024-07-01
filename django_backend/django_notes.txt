@@ -28,7 +28,7 @@ to start the server, from host machine the page can be accessed with \
 localhost:8000 and from network through hostmachine ip:8000
 
 
-Handle changes and migrations
-
-$ python manage.py makemigrations
-$ python manage.py migrate
+Language support:
+- we have: english, german, russian (not sll texts are translated for now, it's in progress)
+- browser detects your language and shows you the appropriate translation
+- to switch between languages: localhost:8000/en | localhost:8000/de | localhost:8000/ru
