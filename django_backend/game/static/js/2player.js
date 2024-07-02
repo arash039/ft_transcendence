@@ -20,11 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const windowHeight = window.innerHeight;
         const aspectRatio = originalWidth / originalHeight;
 
-        if (windowWidth > originalWidth && windowHeight > originalHeight) {
+		if (windowWidth > originalWidth && windowHeight > originalHeight) {
             gameArea.style.width = `${originalWidth}px`;
             gameArea.style.height = `${originalHeight}px`;
-        }
-        else if (windowWidth / windowHeight > aspectRatio) {
+        } else if (windowWidth / windowHeight > aspectRatio) {
             // Window is wider than the game aspect ratio
             gameArea.style.height = '100vh';
             gameArea.style.width = `${100 * aspectRatio}vh`;
@@ -70,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'game_started':
                 message.style.fontSize = '40px';
                 message.textContent = data.message;
-                //reset the font size
-
                 setTimeout(() => {
                     message.textContent = '';
                     message.style.fontSize = '10px';
@@ -79,10 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'game_over':
                 message.textContent = `Game Over! ${data.winner} wins!`;
-                //resetGame();
-                console.log('Game Over');
-                socket.close();
+                resetGame();
                 break;
+			// case 'redirect':
+			// 	window.location.href = data.url;
         }
     };
     function updateGameState(state) {
