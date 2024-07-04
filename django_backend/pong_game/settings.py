@@ -79,6 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pong_game.wsgi.application'
 ASGI_APPLICATION = 'pong_game.wsgi.application'
+# Channel layers allow you to talk between different instances of an application. 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',

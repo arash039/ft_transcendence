@@ -233,3 +233,5 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# sending back the game result. to be developed ...	
 	async def send_game_result(self, result, session_id):
 		print(f"Game result: {result}")
+		user = self.scope['user']
+		

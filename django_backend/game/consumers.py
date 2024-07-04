@@ -42,7 +42,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         else:
             await self.close()
             print("Connection closed for unauthenticated user")
-
     async def disconnect(self, close_code):
         if self.channel_name in self.players:
             player_name = self.players[self.channel_name]
