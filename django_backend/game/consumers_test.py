@@ -11,11 +11,13 @@ import random
 from users.models import Profile
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from datetime import datetime
 
 #https://channels.readthedocs.io/en/stable/topics/consumers.html
 #https://docs.djangoproject.com/en/3.2/topics/auth/default/#user-objects
+
+# get the user data model from the Django auth module
+User = get_user_model()
 
 class PongConsumer(AsyncWebsocketConsumer):
 	game_sessions = {}
@@ -116,7 +118,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			}
 		)
 		await asyncio.sleep(2)
-		for i in range(5, 0, -1):
+		for i in range(3, 0, -1):
 			await self.channel_layer.group_send(
 				session_id,
 				{
@@ -166,22 +168,23 @@ class PongConsumer(AsyncWebsocketConsumer):
 			game_state['score']['player1'] += 1
 			self.reset_ball(session_id)
 
-		if game_state['score']['player1'] >= 3 or game_state['score']['player2'] >=3:
+		if game_state['score']['player1'] >= 2 or game_state['score']['player2'] >=2:
 			winner = list(self.game_sessions[session_id]['players'].values())[1] if game_state['score']['player1'] >= 3 else list(self.game_sessions[session_id]['players'].values())[0]
 			result = {
 				'players': list(self.game_sessions[session_id]['players'].values()),
 				'winner': winner,
 				'score': game_state['score']
 			}
-			asyncio.create_task(self.channel_layer.group_send(
-				session_id,
-				{
-					'type': 'game_over',
-					'winner': winner
-				}
-			))
-			asyncio.create_task(self.send_game_result(result, session_id))
+			# asyncio.create_task(self.channel_layer.group_send(
+			# 	session_id,
+			# 	{
+			# 		'type': 'game_over',
+			# 		'winner': winner
+			# 	}
+			# ))
+			asyncio.create_task(self.send_game_result(result, session_id, winner))
 			self.reset_game(session_id)
+			
 
 	def reset_ball(self, session_id):
 		game_state = self.game_sessions[session_id]['game_state']
@@ -201,6 +204,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 		if self.game_sessions[session_id]['game_loop_task']:
 			self.game_sessions[session_id]['game_loop_task'].cancel()
 			self.game_sessions[session_id]['game_loop_task'] = None
+			
 
 	# receive data from channels and send messages to the clients
 	async def game_state_update(self, event):
@@ -233,7 +237,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'type': 'game_over',
 			'winner': event['winner']
 		}))
-		self.close()
+		await asyncio.sleep(2)
+		await self.close()
 		
 	async def game_started(self, event):
 		await self.send(text_data=json.dumps({
@@ -241,7 +246,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'message': 'Game started!'
 		}))
 
-	async def send_game_result(self, result, session_id):
+	async def send_game_result(self, result, session_id, winner):
 		user = self.scope['user']
 		opponent_username = result['players'][1] if user.username == result['players'][0] else result['players'][0]
 		opponent_user = await self.get_user_by_username(opponent_username)
@@ -252,10 +257,25 @@ class PongConsumer(AsyncWebsocketConsumer):
 		else:
 			await self.update_profile(user, 'losses')
 			await self.update_profile(opponent_user, 'wins')
-
-		print(f"Game result saved for user {user.username}: {result}")
 		
+		current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+		if result['winner'] == user.username:
+			winner = user.username
+			looser = opponent_username
+		else:
+			winner = opponent_username
+			looser = user.username
+		print(f"{current_time}, {winner}, {looser};")
+		# print(f"Game result saved for user {user.username}: {result}")
+		asyncio.create_task(self.channel_layer.group_send(
+			session_id,
+			{
+				'type': 'game_over',
+				'winner': winner
+			}
+		))
+	
 	@sync_to_async
 	def get_user_by_username(self, username):
 		return User.objects.get(username=username)
