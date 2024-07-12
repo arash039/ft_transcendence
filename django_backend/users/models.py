@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 class Profile(models.Model):
@@ -11,6 +12,8 @@ class Profile(models.Model):
 	avatar = models.ImageField(null=True, blank=True, upload_to="avatars/")
 	wins = models.PositiveIntegerField(default=0)
 	losses = models.PositiveIntegerField(default=0)
+	online_status = models.BooleanField(default=False)
+	match_history = models.TextField(null=True, blank=True)
 
 	# for admin area
 	def __str__(self):

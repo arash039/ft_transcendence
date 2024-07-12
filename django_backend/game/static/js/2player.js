@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const socket = new WebSocket(`ws://${window.location.host}/ws/pong/`);
+	const url = window.location.href;
+	const parts = url.split('/');
+	const indexOfSessionId = parts.indexOf('game') + 1;
+	const sessionId = parts[indexOfSessionId];
+	console.log(sessionId);
+	const socket = new WebSocket(`ws://${window.location.host}/ws/game/${sessionId}/`);
+	//const socket = new WebSocket(`ws://${window.location.host}/ws/pong/`);
 	const gameArea = document.getElementById('game-area');
 	const message = document.getElementById('message');
 	const ball = document.getElementById('ball');
@@ -20,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const windowHeight = window.innerHeight;
 		const aspectRatio = originalWidth / originalHeight;
 
+			// Calculate the game area dimensions based on the window size
 		if (windowWidth > originalWidth && windowHeight > originalHeight) {
 			gameArea.style.width = `${originalWidth}px`;
 			gameArea.style.height = `${originalHeight}px`;
@@ -52,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			case 'player_joined':
 				message.textContent = `${data.name} joined the game`;
 				player1.textContent = data.name;
+				setTimeout(() => {
+					message.textContent = '';
+				}, 1000);
 				break;
 			case 'both_players_joined':
 				console.log('Both players joined');
@@ -76,8 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
 				break;
 			case 'game_over':
 				message.textContent = `Game Over! ${data.winner} wins!`;
-				// resetGame();
-				// window.location.href = '/'
+				break;
+			case 'game_stop':
+				message.textContent = data.message;
+				break;
+			case 'player_rejoined':
+				message.textContent = `${data.name} rejoined the game`;
+				player1.textContent = data.name;
+				player2.textContent = data.opponent;
+				setTimeout(() => {
+					message.textContent = '';
+				}, 3000);
 				break;
 		}
 	};
@@ -92,14 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		score2.textContent = state.score.player2;
 
 	}
-	/* function updateGameState(state) {
-		ball.style.left = `${state.ball.x}px`;
-		ball.style.top = `${state.ball.y}px`;
-		paddle1.style.top = `${state.paddle1}px`;
-		paddle2.style.top = `${state.paddle2}px`;
-		score1.textContent = state.score.player1;
-		score2.textContent = state.score.player2;
-	} */
 
 	function resetGame() {
 		ball.style.left = '390px';
@@ -112,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	socket.onclose = (event) => {
 		//message.textContent = 'Connection closed. Please refresh the page.';
-		message.textContent = 'You will be redirected to the home page in 3 seconds.';
+		message.textContent = 'You will be redirected to the home page.';
 		setTimeout(() => {
 			window.location.href = '/';
 		}, 3000);

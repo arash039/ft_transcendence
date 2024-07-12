@@ -79,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pong_game.wsgi.application'
 ASGI_APPLICATION = 'pong_game.wsgi.application'
-# Channel layers allow you to talk between different instances of an application. 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
@@ -156,3 +155,10 @@ LOGIN_URL = 'users/login/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
