@@ -1,89 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tournament</title>
-    <style>
-        .tournament {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .round {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .match {
-            border: 1px solid black;
-            padding: 10px;
-            margin: 10px;
-            width: 150px;
-            text-align: center;
-        }
-        .line {
-            border-top: 2px solid black;
-            width: 50%;
-            margin: 0 auto;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            function checkGameStatus() {
-                $.ajax({
-                    url: "{% url 'check_game_status' %}",
-                    method: "GET",
-                    success: function(data) {
-                        if (data.game_ready) {
-                            $('#go-to-match').removeClass('hidden').attr('data-session-id', data.session_id);
-                            clearInterval(pollInterval);
-                        }
-                    }
-                });
-            }
+{% extends "game/index.html" %}
+{% load static %}
+{% load i18n %}
 
-            var pollInterval = setInterval(checkGameStatus, 5000);
+{% block tournament %}
 
-            $('#go-to-match').click(function() {
-                var sessionId = $(this).data('session-id');
-                //window.location.href = "/tournament/game?session_id=" + sessionId;
-                window.location.href = "/ws/game/" + sessionId + "/";
+    <!-- Game navigation bar -->
+    {% include 'game/header-button-logged.html' %}
 
-            });
-        });
-    </script>
-</head>
-<body>
-    <h1>Tournament</h1>
-    <p>Welcome, {{ user.username }}!</p>
-
-    <div class="tournament">
-        <div class="round">
-            <h2>Semi-finals</h2>
-            {% for match in tournament.semi_finals %}
-                <div class="match">
-                    <h3>Match {{ forloop.counter }}</h3>
-                    <p>{{ match.player1 }}</p>
-                    <p>vs</p>
-                    <p>{{ match.player2 }}</p>
+    <!-- PUT YOUR CODE FROM HERE! -->
+    <!-- 2 player game -->
+    <body id="tournament-page">
+        <h1>Tournament</h1>
+        <p class="welcome">Welcome, <span id="username">{{ user.username }}</span>!</p>
+        <div id="champ"></div>
+        <div id="info"></div>
+        <div class="tournament">
+            <div class="round" id="semi-finals">
+                <h2>Semi-finals</h2>
+                <div class="match" id="match-semi-finals-0">
+                    <h3>Match 1</h3>
+                    <p class="player player1">Waiting for player</p>
+                    <p class="vs">vs</p>
+                    <p class="player player2">Waiting for player</p>
                 </div>
-            {% endfor %}
-        </div>
-        <div class="line"></div>
-        <div class="round">
-            <h2>Final</h2>
-            <div class="match">
-                <h3>Final Match</h3>
-                <p>{{ tournament.final.player1 }}</p>
-                <p>vs</p>
-                <p>{{ tournament.final.player2 }}</p>
+                <div class="match" id="match-semi-finals-1">
+                    <h3>Match 2</h3>
+                    <p class="player player1">Waiting for player</p>
+                    <p class="vs">vs</p>
+                    <p class="player player2">Waiting for player</p>
+                </div>
+            </div>
+            <div class="round">
+                <h2>Final</h2>
+                <div class="match" id="match-final">
+                    <h3>Final Match</h3>
+                    <p class="player player1">Waiting for player</p>
+                    <p class="vs">vs</p>
+                    <p class="player player2">Waiting for player</p>
+                </div>
             </div>
         </div>
-    </div>
-
-    <button id="go-to-match" class="hidden">Go to Match</button>
-</body>
-</html>
+    
+        <button id="go-to-match" class="hidden">Go to Match</button>
+        <script src="{% static 'js/tour.js' %}"></script>
+    </body>
+    <!-- UNTIL HERE! -->
+{% endblock tournament %}

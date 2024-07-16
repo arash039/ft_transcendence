@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const socket = new WebSocket(`ws://${window.location.host}/ws/pong/`);
+	const url = window.location.href;
+	const parts = url.split('/');
+	const indexOfSessionId = parts.indexOf('tour_game') + 1;
+	const sessionId = parts[indexOfSessionId];
+	console.log(sessionId);
+	const socket = new WebSocket(`ws://${window.location.host}/tour_game/${sessionId}/`);
 	const gameArea = document.getElementById('game-area');
 	const message = document.getElementById('message');
 	const ball = document.getElementById('ball');
@@ -119,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		//message.textContent = 'Connection closed. Please refresh the page.';
 		message.textContent = 'You will be redirected to the home page.';
 		setTimeout(() => {
-			window.location.href = '/';
+			window.location.href = '/tournament';
 		}, 3000);
 	};
 
