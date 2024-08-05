@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
    // Buttons listeners for online games:
     $(document).on('click', '.btn-2pl-game', function(event) {
 		console.log('Online 1x1 game clicked');
-        sendLogToLogstash('User clicked on button 2pl-game', 'info');
+        sendLogToLogstash('User clicked on button 2pl-game');
 		hideElement(document.getElementById('get-started'));
 		event.preventDefault();
         window.location.hash = 'online-1x1';
@@ -860,8 +860,31 @@ function setElementinnerHTML(element, string) {
 	}
 }
 
-function sendLogToLogstash(logMessage, logLevel = 'info') {
-    fetch('http://logstash:5044', {
+// function sendLogToLogstash(logMessage, logLevel = 'info') {
+//     fetch('http://logstash:5044', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         timestamp: new Date().toISOString(),
+//         message: logMessage,
+//         level: logLevel,
+//         type: 'js_logs'
+//       })
+//     })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+//       return response.text();
+//     })
+//     .then(data => console.log('Log sent to Logstash:', data))
+//     .catch(error => console.error('Error sending log to Logstash:', error));
+// }
+
+function sendLogToLogstash(logMessage) {
+    fetch('http://logstash:5044', {  // Note: Using HTTP here, change to HTTPS if configured
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -869,9 +892,9 @@ function sendLogToLogstash(logMessage, logLevel = 'info') {
       body: JSON.stringify({
         timestamp: new Date().toISOString(),
         message: logMessage,
-        level: logLevel,
-        type: 'js_logs'
-      })
+        type: 'js_log'
+      }),
+      mode: 'cors',
     })
     .then(response => {
       if (!response.ok) {
@@ -881,4 +904,5 @@ function sendLogToLogstash(logMessage, logLevel = 'info') {
     })
     .then(data => console.log('Log sent to Logstash:', data))
     .catch(error => console.error('Error sending log to Logstash:', error));
-}
+  }
+  
