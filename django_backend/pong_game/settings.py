@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
+import graypy
+from logging.handlers import RotatingFileHandler
+import logging
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,12 +38,14 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+	'daphne',
 	'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+	'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'game',
     'users',
@@ -49,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 	'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware', #for the language support
     'django.middleware.locale.LocaleMiddleware', #for the language support
     'django.middleware.common.CommonMiddleware', #for the language support
@@ -56,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'pong_game.urls'
@@ -78,7 +85,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pong_game.wsgi.application'
-ASGI_APPLICATION = 'pong_game.wsgi.application'
+ASGI_APPLICATION = 'pong_game.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
@@ -145,6 +152,7 @@ TIME_ZONE = 'Europe/Berlin'
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = '/'
@@ -161,4 +169,33 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
     }
+}
+
+PROMETHEUS_EXPORT_MIGRATIONS = True
+PROMETHEUS_EXPORT_ADMIN = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'gelf_error': {
+            'class': 'graypy.GELFUDPHandler',
+            'host': 'logstash',
+            'port': 12201,
+            'level': 'ERROR',
+        },
+        'gelf_info': {
+            'class': 'graypy.GELFUDPHandler',
+            'host': 'logstash',
+            'port': 12201,
+            'level': 'INFO',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['gelf_error', 'gelf_info'],
+            'level': 'DEBUG',  # DEBUG captures all levels
+            'propagate': True,
+        },
+    },
 }

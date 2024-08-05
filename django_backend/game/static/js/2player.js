@@ -1,5 +1,21 @@
-document.addEventListener('DOMContentLoaded', () => {
-	const socket = new WebSocket(`ws://${window.location.host}/ws/pong/`);
+export function game_handler() {
+	let cleaning = false;
+	const online1x1Html = `
+		<div id="game-area">
+			<p class="text-center"><h3 id="message" class="message"></h3></p>
+			<div id="ball"></div>
+			<div id="paddle1" class="paddle"></div>
+			<div id="paddle2" class="paddle"></div>
+			<div id="player1-name" class="player-name"></div>
+			<div id="score1">0</div>
+			<div id="player2-name" class="player-name"></div>
+			<div id="score2">0</div>
+		</div>
+	`
+	
+	setElementinnerHTML(document.getElementById('online-1x1'), online1x1Html);
+	showElement(document.getElementById('online-1x1'));
+	const socket = new WebSocket(`wss://${window.location.host}/wss/pong/`);
 	const gameArea = document.getElementById('game-area');
 	const message = document.getElementById('message');
 	const ball = document.getElementById('ball');
@@ -9,34 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	const score2 = document.getElementById('score2');
 	const player1 = document.getElementById('player1-name');
 	const player2 = document.getElementById('player2-name');
-   
 
 	message.textContent = 'Waiting for players to join...';
-	const originalWidth = 780;
-	const originalHeight = 380;
-
-	function updateGameDimensions() {
-		const windowWidth = window.innerWidth;
-		const windowHeight = window.innerHeight;
-		const aspectRatio = originalWidth / originalHeight;
-
-			// Calculate the game area dimensions based on the window size
-		if (windowWidth > originalWidth && windowHeight > originalHeight) {
-			gameArea.style.width = `${originalWidth}px`;
-			gameArea.style.height = `${originalHeight}px`;
-		} else if (windowWidth / windowHeight > aspectRatio) {
-			// Window is wider than the game aspect ratio
-			gameArea.style.height = '100vh';
-			gameArea.style.width = `${100 * aspectRatio}vh`;
-		} else {
-			// Window is taller than the game aspect ratio
-			gameArea.style.width = '100vw';
-			gameArea.style.height = `${100 / aspectRatio}vw`;
-		}
-	}
-
-	updateGameDimensions();
-	window.addEventListener('resize', updateGameDimensions);
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
@@ -67,15 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 				message.textContent = data.message;
 				break;
 			case 'game_state':
-				//console.log('Game state received', data.game_state);
 				updateGameState(data.game_state);
 				break;
 			case 'game_started':
-				message.style.fontSize = '40px';
 				message.textContent = data.message;
 				setTimeout(() => {
 					message.textContent = '';
-					message.style.fontSize = '10px';
 				}, 1000);
 				break;
 			case 'game_over':
@@ -94,37 +81,60 @@ document.addEventListener('DOMContentLoaded', () => {
 				break;
 		}
 	};
+
 	function updateGameState(state) {
-		ball.style.left = `${(state.ball.x / originalWidth) * 100}%`;
-		ball.style.top = `${(state.ball.y / originalHeight) * 100}%`;
-
-		paddle1.style.top = `${(state.paddle1 / originalHeight) * 100}%`;
-		paddle2.style.top = `${(state.paddle2 / originalHeight) * 100}%`;
-
+		ball.style.left = `${state.ball.x}px`;
+		ball.style.top = `${state.ball.y}px`;
+	
+		paddle1.style.top = `${state.paddle1}px`;
+		paddle2.style.top = `${state.paddle2}px`;
+	
 		score1.textContent = state.score.player1;
 		score2.textContent = state.score.player2;
-
-	}
-
-	function resetGame() {
-		ball.style.left = '390px';
-		ball.style.top = '190px';
-		paddle1.style.top = '160px';
-		paddle2.style.top = '160px';
-		score1.textContent = '0';
-		score2.textContent = '0';
 	}
 
 	socket.onclose = (event) => {
-		//message.textContent = 'Connection closed. Please refresh the page.';
-		message.textContent = 'You will be redirected to the home page.';
-		setTimeout(() => {
-			window.location.href = '/';
-		}, 3000);
+		switch (event.code) {
+			case 3001:
+				message.textContent = 'Player already joined the game. You will be redirected';
+				break;
+			case 3002:
+				message.textContent = 'Connection closed: no available game session';
+				break;
+			case 3003:
+				message.textContent = 'Connection closed for unauthenticated user';
+				break;
+			default:
+				message.textContent = 'You will be redirected to the home page.';
+		}
+		if (socket.readyState === WebSocket.CLOSED) {
+			setTimeout(() => {
+				window.location.hash = 'get-started';
+			}, 3000);
+		}
 	};
 
 	socket.onerror = (error) => {
 		console.error('WebSocket Error:', error);
 		message.textContent = 'An error occurred. Please refresh the page.';
 	};
-});
+
+	function cleanupGame() {
+		console.log('Cleaning up game');
+		socket.close();
+		deactivateListeners();
+		//history.pushState(null, '', window.location.href);
+	};
+
+	function deactivateListeners() {
+		window.removeEventListener('beforeunload', cleanupGame);
+		window.removeEventListener('popstate', cleanupGame);
+	};
+	
+	function setupEventListeners() {
+		window.addEventListener('beforeunload', cleanupGame);
+		window.addEventListener('popstate', cleanupGame);
+	};
+
+	setupEventListeners();
+}

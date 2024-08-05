@@ -1,33 +1,51 @@
 import json
 import uuid
-import random
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache
 from channels.db import database_sync_to_async
+import logging
+
+logger = logging.getLogger('django')
 
 class TournamentConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		self.user = self.scope['user']
 		self.room_group_name = 'tournament'
-
+		await self.accept()
+		active_players = cache.get('active_players', [])
+		#print('active_players', active_players)
+		logger.info(f'active_players: {active_players}')
+		if self.user.username in active_players:
+			pass
+		elif len(active_players) >= 4:
+			#print('Tournament is full')
+			logger.info('Tournament is full')
+			await self.close(code = 3002)
+			return
+		
 		await self.channel_layer.group_add(
 			self.room_group_name,
 			self.channel_name
 		)
 
-		await self.accept()
+		if self.user.username not in active_players:
+			await self.add_active_player()
 		player_in_game = cache.get('player_in_game', [])
 		if self.user.username in player_in_game:
 			player_in_game.remove(self.user.username)
 		await self.update_tournament_status()
 
 	async def disconnect(self, close_code):
+		if self.user.username not in cache.get('active_players', []):
+			return
 		await self.channel_layer.group_discard(
 			self.room_group_name,
 			self.channel_name
 		)
 		player_in_game = cache.get('player_in_game', [])
+		#print('player_in_game', player_in_game)
+		logger.info(f'player_in_game: {player_in_game}')
 		if self.user.username in player_in_game:
 			pass
 		else:
@@ -36,11 +54,14 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				{
 					'type': 'go_back_to_home',
 					'content': {'type': 'go_back_to_home'},
-					'message': 'tornument end due to player exit. you will be redirected'
+					'message': 'tornument end due to exit of a player. you may exit now'
 				}
 			)
+			#print('player left the game so tournament ended')
+			logger.info('player left the game so tournament ended')
 			cache.delete('tournament')
 			cache.delete('player_in_game')
+			cache.delete('active_players')
 	
 	async def receive(self, text_data):
 		data = json.loads(text_data)
@@ -72,6 +93,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	def end_tournament(self):
 		asyncio.sleep(5)
 		cache.delete('tournament')
+		cache.delete('player_in_game')
+		cache.delete('active_players')
 		
 
 	@database_sync_to_async
@@ -114,11 +137,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		if tournament['semi_finals'][0]['winner'] == self.user.username:
 				tournament['final']['player1'] = self.user.username
 				cache.set('tournament', tournament, timeout=3600)
-				print('match 1 winner set in final position 1')
+				#print('match 1 winner set in final position 1')
+				logger.info('match 1 winner set in final position 1')
 		if tournament['semi_finals'][1]['winner'] == self.user.username:
 				tournament['final']['player2'] = self.user.username
 				cache.set('tournament', tournament, timeout=3600)
-				print('match 2 winner set in final position 2')
+				#print('match 2 winner set in final position 2')
+				logger.info('match 2 winner set in final position 2')
 		
 		return tournament, user_position
 
@@ -130,7 +155,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			'tournament': tournament,
 			'user': self.user.username,
 			'champion': None,
-			#'game_ready': False
 		}
 
 		to_game = {
@@ -159,9 +183,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			to_game['players'] = None
 			to_game['session_id'] = None
 			context['champion'] = tournament['final']['winner']
-			print('Champion is: ', context['champion'])
+			#print('Champion is: ', context['champion'])
+			logger.info(f'Champion is: {context["champion"]}')
 			
-	
 		await self.channel_layer.group_send(
 			self.room_group_name,
 			{
@@ -190,7 +214,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			cache.delete('tournament')
 	
 	async def update_tournament_chart(self, event):
-		print('update_tournament_chart')
+		#print('update_tournament_chart')
+		logger.info('update_tournament_chart')
 		await self.send(text_data=json.dumps(event['content']))
 
 	async def go_to_game(self, event):

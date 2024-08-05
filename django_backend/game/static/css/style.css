@@ -1,3 +1,6 @@
+#header-welcome {
+    margin-bottom: 10px;
+}
 
 #screen {
     align-content: top;
@@ -5,7 +8,6 @@
     padding-top: 0px;
     height: 100vh;
 }
-
 
 #logo-big {
     color: #ffffff;
@@ -16,10 +18,6 @@
     margin-top: 10px;
 }
 
-#user-navbar {
-    margin-bottom: 30px;
-}
-
 #sublitle {
     color: #ff56d8;
     font-size: 16pt;
@@ -28,38 +26,24 @@
     letter-spacing: 3pt;
 }
 
-#header-welcome {
-    margin-bottom: 10px;
-}
-
-#header-game {
+.header-game {
     align-content: top;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-#choose-mode {
-    margin-top: 100px;
-    margin-bottom: 100px;
-}
-
 #footer-welcome {
-    margin-top: 30px;
+    margin-top: 50px;
+    padding-top: 50px;
+    margin-bottom: 50px;
+    padding-bottom: 50px;
 }
 
 #profile-menu {
     margin-bottom: 50px;
 }
 
-/* #logo-small {
-    color: #ffffff;
-    font-size: 10pt;
-    font-family: "Monoton", sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 5pt;
-    margin-top: 0px;
-    padding-top: 0px;
-} */
+/* Text styles  -----------------------------------------------------------------------------------------------------*/
 
 h1 {
     color: #ffffff;
@@ -81,16 +65,142 @@ h2 {
 h3 {
     color: #ffffff;
     font-size: 10pt;
-    font-family:monospace;
+    font-family: monospace;
     text-transform: uppercase;
     letter-spacing: 3pt;
 }
+
+h5 {
+    padding-bottom: 20px;
+}
+
+h6 {
+    color: #ffffff;
+    font-size: 24pt;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+    margin-bottom: 30px;
+}
+
+p {
+    color: #ffffff;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+table {
+    color: #ffffff;
+}
+
+/* Login & signup forms: ---------------------------------------------------------------------------------------------------*/
+
+#login_form, #signup_form, #update_display_name_form, #update_avatar_form, #update_user_form {
+    width: 400px;
+    margin: 30px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 30px;
+}
+
+#id-login, #id-signup, #id-update-displayname, #id-update-avatar, #id-update-user {
+    text-align: center;
+    margin: 30px auto;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form .form-control {
+    width: 300px;
+    margin-bottom: 15px;
+}
+
+form label {
+    color: #7d7fac;  /* Customize label color */
+    text-align: left;
+    width: 300px;
+    margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="password"] {
+    width: 300px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+form a[type="submit"] {
+    width: 100px;
+    padding: 10px;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.helptext {
+    color: #6c757d;  /* Help text color */
+    display: none;
+    width: 300px;
+}
+
+#id-avatar-helptext {
+    color: #6c757d;  /* Help text color */
+    display: none;
+    width: 300px;
+}
+
+form ul {
+    width: 300px;
+    list-style-type: none;
+    padding: 0;
+    font-size: 9pt;
+    line-height: 13pt;
+}
+
+form ul li {
+    margin-bottom: 10px;
+    padding: 0px;
+    border-radius: 4px;
+    color: #495057;
+    text-align: left;
+}
+
+
+/* Offline games login input form ------------------------------------------------------------------------------------*/
+
+#player_form_1x1, #player_form_4 {
+    width: 400px;
+    top: 250px;
+    left: calc(50% - 200px);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the items within the form */
+    justify-content: center; /* Centers the form vertically */
+    text-align: center;
+    background-color: white;
+    padding: 30px;
+    border-radius: 30px;
+    position: absolute;
+    z-index: 1;
+}
+
+/* These are the navigation buttons: -------------------------------------------------------------------------------*/
 
 .btn-lg,.btn-sm {
     border-width: 2px;
 }
 
-.btn-group{
+.btn-block{
     margin-top: 0px;
 }
 
@@ -100,23 +210,136 @@ h3 {
 }
 
 .btn-group-vertical > button{
-    margin-bottom:10px;
-    border-radius:10px !important;
+    margin-bottom: 10px;
+    border-radius: 10px !important;
 }
 
-#name_form {
-    width: 400px;
-    margin: 100px auto; /* Centers the form horizontally */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers the items within the form */
-    justify-content: center; /* Centers the form vertically */
+.choose-mode {
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+#nextGame {
+    width: 300px;
+    height: 50px;
+    z-index: 1;
+}
+
+#exitTour {
+    width: 300px;
+    height: 100px;
+    z-index: 10; /* Ensure it's on top of other elements */
+    display: none; /* Initially hidden, should be set to 'block' when needed */
+}
+
+#hor-nav, #profile-nav, #profile-nav2 {
+    margin-top: 50px;
+}
+
+/* Profile & friends -------------------------------------------------------------------------------------------------*/
+
+#profile, #profile-list-page {
+    width: 700px;
+    align-items: center;
+    margin: auto;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 2px solid #7d7fac;
+    background-color: #323131;
+    border-radius: 30px;
+    padding: 30px;
+}
+
+.custom-divider {
+    border: 1px solid #232222;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.avatar-square {
+    width: 210px;
+    object-fit: cover;
+    border-radius: 0;
+    margin: 0px;
+    padding: 0px;
+    margin-left: 0px;
+    padding-left: 0px;
+    margin-right: 0px;
+    padding-right: 0px;
+}
+
+.text-start {
+    align-items: right;
+    margin-left: 0px;
+    padding-left: 0px;
+    margin-right: 0px;
+    padding-right: 0px;
+}
+
+
+/* Messages in the game ---------------------------------------------------------------------------------------------*/
+
+#champ{
     text-align: center;
+    font-size: 3.2em;
+    font-weight: bold;
+    color: #ff56d8;
+    margin-top: 40px;
 }
 
+.megaWinner {
+    position: absolute;
+    top: 200px; /* Adjust based on your layout */
+    font-weight: bold;
+    color: #ffffff;
+    z-index: 10; /* Ensure it's on top of other elements */
+    display: none; /* Initially hidden, should be set to 'block' when needed */
+}
 
+#megaWinnerName {
+    color: #ffffff;
+    font-size: 30px;
+}
 
-/* Basic game: */
+#winnerMessage_1x1, #winnerMessage_4 {
+    position: absolute;
+    top: 230px;
+    display: none; /* Initially hide the winner message */
+}
+
+.message { 
+    position: fixed; 
+    color: #7d7fac; 
+    text-align: center;
+    top: 385px; 
+    margin: 60px auto auto auto; 
+}
+
+#message_1x1, #message_4{ 
+    position: fixed; 
+    color: #7d7fac; 
+    text-align: center;
+    top: 385px; 
+    margin: 60px auto auto auto; 
+    /* font-size: 10pt;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt; */
+}
+
+#four_message {
+    position: fixed; 
+    color: #7d7fac; 
+    text-align: center;
+    top: 300px; 
+    margin: 60px auto auto auto; 
+    font-size: 10pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+}
+
+/* Basic game  ------------------------------------------------------------------------------------------------------*/
 * { 
     margin: 0; 
     padding: 0; 
@@ -133,101 +356,267 @@ body {
     margin-top: 0px;
     padding-top: 0px;
 }
+/* Offline games ----------------------------------------------------------------------------------------------------*/
+
+.board { 
+    top: 105px;
+    left: calc(50% - 450px);
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center content vertically */
+    width: 900px; /* This ensures the width is 80% of the viewport width */
+    height: 600px; 
+    border: 2px solid rgb(255, 255, 255);
+    margin: auto; /* Center the board horizontally */
+    position: fixed; 
+}
+#board_1x1, #board_4 { 
+    top: 105px;
+    left: calc(50% - 450px);
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center content vertically */
+    width: 900px; /* This ensures the width is 80% of the viewport width */
+    height: 600px; 
+    border: 2px solid rgb(255, 255, 255);
+    margin: auto; /* Center the board horizontally */
+    position: fixed; 
+}
+
+#ball_1x1 { 
+    height: 30px; 
+    width: 30px; 
+    border-radius: 50%; 
+    position: fixed; 
+    top: 380px; 
+    left: calc(50% - 15px); 
+    background-color: white;
+}
+#ball_4 { 
+    height: 30px; 
+    width: 30px; 
+    border-radius: 50%; 
+    position: fixed; 
+    top: 380px; 
+    left: calc(50% - 15px); 
+    background-color: white;
+}
+
+/* .ball { 
+    height: 30px; 
+    width: 30px; 
+    border-radius: 50%; 
+    position: fixed; 
+    top: 380px; 
+    left: calc(50% - 15px); 
+    background-color: white;
+} */
+
+.paddle_off { 
+    height: 100px; 
+    width: 10px; 
+    top: 350px;
+    position: fixed;  
+} 
+
+#paddle1_1x1, #paddle1_4 {
+    top: 350px; 
+    left: calc(50% - 440px);  
+    background-color: rgb(31, 172, 237);
+} 
+  
+#paddle2_1x1, #paddle2_4 {  
+    top: 350px;
+    right: calc(50% - 440px);   
+    background-color: rgb(191, 43, 221);
+}  
+
+.scores_off {
+    top: 110px; 
+    font-size: 30pt;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+    position: fixed;
+    justify-content: center;
+    margin: auto;
+    display: flex;
+    z-index: 1;
+}
+
+#score1_1x1, #score1_4 {
+    color: rgb(31, 172, 237);
+    left: calc(50% - 440px);
+}
+
+#score2_1x1, #score2_4 {
+    color: rgb(191, 43, 221);
+    right: calc(50% - 440px);
+}
+
+.player_name_off {
+    top: 80px;
+    position: fixed;
+    display: flex;
+}
+
+#name1_1x1, #name1_4, #name1_ai {
+    text-align: left;
+    left: calc(50% - 440px);
+    color: rgb(31, 172, 237);
+}
+
+#name2_1x1, #name2_4, #name2_ai {
+    text-align: right;
+    right: calc(50% - 440px);
+    color: rgb(191, 43, 221);
+}
+
+.form-control {
+    width: 100%; /* Full width input */
+    margin-bottom: 10px; /* Spacing between inputs */
+}
+
+.btn-primary {
+    width: 100%; /* Full width button */
+    margin-top: 10px; /* Spacing between input and button */
+}
+
+.tournament_off {
+    display: flex;
+    flex-direction: row; /* Added missing semicolon */
+    justify-content: center;
+    /* margin-top: 30px;
+    margin-left: 30px;
+    margin-right: 30px; */
+}
+
+.match_off {
+    width: 300px; /* Corrected the width property */
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 30px;
+}
+
+/* Online games -----------------------------------------------------------------------------------------------------*/
 
 #game-area {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #000;
-    overflow: hidden;
+    top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 900px;
+    height: 600px; 
+    border: 2px solid rgb(255, 255, 255);
+    margin: auto;
+    position: relative;
 }
 
 #ball {
-    position: absolute;
-    width: 1.28%;
-    padding-bottom: 1.28%;
-    background-color: white;
+    width: 30px; 
+    height: 30px; 
     border-radius: 50%;
+    position: absolute;
+    background-color: white;
     transform: translate(-50%, -50%);
+    left: 450px;
+    top: 290px;
 }
 
 .paddle {
     position: absolute;
-    width: 1.28%;
-    height: 21.05%;
-    background-color: white;
+    height: 100px; 
+    width: 10px;
+    top: 260px;
 }
 
 #paddle1 {
-    left: 1.28%;
+    left: calc(50% - 440px); 
+    top: 260px; 
+    background-color: rgb(31, 172, 237);
 }
 
 #paddle2 {
-    right: 1.28%;
+    right: calc(50% - 440px);
+    top: 260px;
+    background-color: rgb(191, 43, 221);
 }
 
 #score1, #score2 {
-    position: absolute;
-    top: 10%;
-    color: white;
-    font-size: 5vh;
+    top: 104px; 
+    font-size: 30pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
 }
 
 #score1 {
-    left: 25%;
+    color: rgb(31, 172, 237);
+    position: fixed;
+    left: calc(50% - 440px);
+    display: flex;
+    justify-content: center;
+    margin: auto; /* Center the board horizontally */
+    z-index: 1; /* Ensure the score is on top of other elements */
 }
 
 #score2 {
-    right: 25%;
+    color: rgb(191, 43, 221);
+    position: fixed;
+    right: calc(50% - 440px);
+    display: flex;
+    justify-content: center;
+    margin: auto; /* Center the board horizontally */
+    z-index: 1; /* Ensure the score is on top of other elements */
 }
 
+
 #player1-name, #player2-name {
-    position: absolute;
-    top: 5%;
-    color: white;
-    font-size: 3vh;
+    top: 79px; 
+    font-size: 10pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
 }
 
 #player1-name {
-    left: 25%;
-    transform: translateX(-50%);
+
+    text-align: left;
+    color: rgb(31, 172, 237);
+    position: fixed;
+    left: calc(50% - 440px);
+    display: flex;
 }
 
 #player2-name {
-    right: 25%;
-    transform: translateX(50%);
-}
 
-#message {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 3vh;
-    text-align: center;
-    width: 100%;
+    text-align: right;
+    right: calc(50% - 440px);
+    display: flex;
+    position: fixed;
+    color: rgb(191, 43, 221);
 }
 
 #four_game-area {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 400px;
-    height: 400px;
-    transform: translate(-50%, -50%);
-    background-color: #000;
-    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 55px;
+    width: 600px;
+    height: 600px;
+    border: 2px solid rgb(255, 255, 255);
+    margin: auto;
 }
 
 #four_ball {
     position: absolute;
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     background-color: white;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
 }
 
 .four_paddle {
@@ -236,89 +625,93 @@ body {
 }
 
 #four_paddle1 {
-    left: 0;
-    top: 200px;
+    left: 0px;
     width: 10px;
-    height: 80px;
-    transform: translateY(-50%);
-	background-color: yellow;
+    height: 100px;
+	background-color: rgb(31, 172, 237);
 }
 
 #four_paddle2 {
-    top: 0;
-    left: 200px;
-    width: 80px;
+    top: 0px;
+    width: 100px;
     height: 10px;
-    transform: translateX(-50%);
-	background-color: blue;
+
+	background-color: rgb(66, 210, 143);
 }
 
 #four_paddle3 {
-    right: 0;
-    top: 200px;
+    right: 0px;
     width: 10px;
-    height: 80px;
-    transform: translateY(-50%);
-	background-color: red;
+    height: 100px;
+	background-color: rgb(191, 43, 221);
 }
 
 #four_paddle4 {
-    bottom: 0;
-    left: 200px;
-    width: 80px;
+    bottom: 0px;
+    width: 100px;
     height: 10px;
-    transform: translateX(-50%);
-	background-color: white;
+	background-color: rgb(251, 237, 132);
 }
-
+/* #score1, #score2 {
+    top: 104px; 
+    font-size: 30pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+} */
 #four_score1, #four_score2, #four_score3, #four_score4 {
     position: absolute;
-    color: white;
-    font-size: 20px;
+    font-size: 30pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt
 }
 
 #four_score1 {
-    left: 10%;
-    top: 5%;
+    left: -40px;
+    top: 270px;
+    color: rgb(31, 172, 237);
 }
 
 #four_score2 {
-    right: 10%;
-    top: 5%;
+
+    top: -60px;
+    color: rgb(66, 210, 143);
 }
 
 #four_score3 {
-    right: 10%;
-    bottom: 5%;
+    right: -40px;
+    top: 270px;
+    color: rgb(191, 43, 221);
 }
 
 #four_score4 {
-    left: 10%;
-    bottom: 5%;
+
+    bottom: -60px;
+    color: rgb(251, 237, 132);
 }
 
 #four_player1-name, #four_player2-name, #four_player3-name, #four_player4-name {
     position: absolute;
-    /* color: white; */
-    font-size: 12px;
+    font-size: 10pt;
+    font-family:monospace;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
 }
 
 #four_player1-name {
-    left: 10%;
-    top: 2%;
-	color: yellow;
+    left: 20px;
+	color: rgb(31, 172, 237);
 }
 
 #four_player2-name {
-    right: 10%;
-    top: 2%;
-	color: blue;
+    top: 20px;
+	color: rgb(66, 210, 143);
 }
 
 #four_player3-name {
-    right: 10%;
-    bottom: 2%;
-	color: red;
+    right: 20px;
+	color: rgb(191, 43, 221);
 }
 
 #four_player4-name {
@@ -326,19 +719,6 @@ body {
     bottom: 2%;
 	color: white;
 }
-
-#four_message {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 12px;
-    text-align: center;
-    width: 100%;
-}
-
-
 
 
 #tournament-page {
@@ -357,10 +737,10 @@ body {
     padding: 20px;
 }
 
-h1, h2 {
+/* h1, h2 {
     text-align: center;
     color: white;
-}
+} */
 .tournament {
     display: flex;
     justify-content: space-between;
@@ -420,13 +800,6 @@ h1, h2 {
 .hidden {
     display: none !important;
 }
-#champ {
-    text-align: center;
-    font-size: 3.2em;
-    font-weight: bold;
-    color:  #ff56d8;
-    margin-top: 40px;
-}
 
 .welcome {
     font-family:monospace;
@@ -440,4 +813,6 @@ h1, h2 {
     color: white;
     text-align: center;
     margin-top: 25px;
+    bottom: 20px;
+	  color: rgb(251, 237, 132);
 }
