@@ -94,6 +94,7 @@ function showSection(sectionId) {
     }
 }
 
+// Monitor the visibility of the online games sections: necessary for the browser buttons to function properly
 function onTourHallVisible() {
     console.log('Tournament hall is now visible.');
     import ('./tour.js').then(module => {
@@ -127,13 +128,10 @@ document.addEventListener('DOMContentLoaded', function() {
    // Buttons listeners for online games:
     $(document).on('click', '.btn-2pl-game', function(event) {
 		console.log('Online 1x1 game clicked');
-        sendLogToLogstash('User clicked on button 2pl-game');
+        sendLog('info', 'Online 1x1 game clicked');
 		hideElement(document.getElementById('get-started'));
 		event.preventDefault();
         window.location.hash = 'online-1x1';
-		// import ('./2player.js').then(module => {
-		// 	module.game_handler();
-		// });
 	});
 
 	$(document).on('click', '.btn-4pl-game', function(event) {
@@ -141,25 +139,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		hideElement(document.getElementById('get-started'));
 		event.preventDefault();
         window.location.hash = 'online-4';
-		// import ('./4player.js').then(module => {
-		// 	module.game_handler_4pl();
-		// });
 	});
 
     $(document).on('click', '.btn-online-tour', function(event) {
         hideElement(document.getElementById('get-started'));
         event.preventDefault();
         window.location.hash = 'tour-hall';
-        // setTimeout(() => {
-        //     window.location.hash = 'tour-hall';
-        // }, 2000) ;
-		// console.log('online tournament clicked now');
-		// hideElement(document.getElementById('get-started'));
-		// event.preventDefault();
-        // window.location.hash = 'tour-hall';
-		// import ('./tour.js').then(module => {
-		// 	module.startTournament();
-		// });
 	});
 
     // Buttons listeners for offline games:
@@ -860,49 +845,44 @@ function setElementinnerHTML(element, string) {
 	}
 }
 
-// function sendLogToLogstash(logMessage, logLevel = 'info') {
-//     fetch('http://logstash:5044', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         timestamp: new Date().toISOString(),
-//         message: logMessage,
-//         level: logLevel,
-//         type: 'js_logs'
-//       })
-//     })
-//     .then(response => {
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//       }
-//       return response.text();
-//     })
-//     .then(data => console.log('Log sent to Logstash:', data))
-//     .catch(error => console.error('Error sending log to Logstash:', error));
-// }
+// LOGGING SERVICE: IT SENDS LOGS TO THE BACKEND VIA API
 
-function sendLogToLogstash(logMessage) {
-    fetch('http://logstash:5044', {  // Note: Using HTTP here, change to HTTPS if configured
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        timestamp: new Date().toISOString(),
-        message: logMessage,
-        type: 'js_log'
-      }),
-      mode: 'cors',
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.text();
-    })
-    .then(data => console.log('Log sent to Logstash:', data))
-    .catch(error => console.error('Error sending log to Logstash:', error));
-  }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+function sendLog(level, message) {
+	fetch('/api/logs/', {
+	  method: 'POST',
+	  headers: {
+		'Content-Type': 'application/json',
+		'X-CSRFToken': getCookie('csrftoken')
+	  },
+	  body: JSON.stringify({
+		level: level,
+		message: message
+	  })
+	})
+	.then(response => {
+	  if (response.ok) {
+		console.log('Log successfully sent.');
+	  } else {
+		console.error('Error sending log:', response.statusText);
+	  }
+	})
+	.catch(error => console.error('Error:', error));
+}
   

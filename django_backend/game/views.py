@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.contrib.auth.forms import UserCreationForm
 from users.forms import UpdateAvatarForm
 import logging
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 logger = logging.getLogger('django')
 
@@ -45,6 +47,29 @@ def test(request):
 def get_username(request):
     logger.info('username requested')
     return JsonResponse({'username': request.user.username})
+
+@csrf_exempt
+def log_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            level = data.get('level', 'info').lower()
+            message = data.get('message', '')
+
+            if level == 'info':
+                logger.info(message)
+            elif level == 'warning':
+                logger.warning(message)
+            elif level == 'error':
+                logger.error(message)
+            elif level == 'critical':
+                logger.critical(message)
+            else:
+                logger.debug(message)
+            return JsonResponse({'status': 'success'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # def hello(request):
 # 	return render(request, 'game/hello.html')

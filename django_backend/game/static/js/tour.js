@@ -194,6 +194,7 @@ export async function startTournament() {
 		console.log('Cleaning up game');
 		tournamentSocket.close();
 		deactivateListeners();
+		//history.pushState(null, '', window.location.href);
 	};
 
 	function deactivateListeners() {

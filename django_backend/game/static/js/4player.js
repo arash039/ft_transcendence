@@ -137,6 +137,7 @@ export function game_handler_4pl() {
 		console.log('Cleaning up game');
 		socket.close();
 		deactivateListeners();
+		//history.pushState(null, '', window.location.href);
 	};
 
 	function deactivateListeners() {

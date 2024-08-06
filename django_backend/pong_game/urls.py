@@ -27,6 +27,7 @@ urlpatterns = [
     path('set-language/', views.set_language, name='set_language'),
     path('admin/', admin.site.urls),
     path('', include('django_prometheus.urls')),
+	path('api/logs/', views.log_view, name='log_view'),
 ]
 
 
