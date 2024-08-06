@@ -11,16 +11,34 @@ function showSection(sectionId) {
     // Show only selected (via click on button/link) section
     const selectedSection = document.getElementById(sectionId);
     if (selectedSection) {
-        selectedSection.style.display = 'block';
-        if (sectionId === 'tour-hall') {
+		if (sectionId === 'get-started') {
+
+			// a delay in the loading this setion is necessary to ensure that the event listeners to capture the exit event are set up
+			// and cleared after closing the ws connection. delay time filled with a loading animation. without this delay, the exit event
+			// it is possible that the user is kicked out of the game when changing sections too fast because the event listeners are still active.
+		
+			document.getElementById('loading-animation').style.display = 'flex';
+			setTimeout(() => {
+				document.getElementById('loading-animation').style.display = 'none';
+				selectedSection.style.display = 'block';
+				console.log('Get started section is now visible.');
+			}, 3000);
+		}
+        else if (sectionId === 'tour-hall') {
+			selectedSection.style.display = 'block';
             onTourHallVisible();
         }
         else if (sectionId === 'online-1x1') {
+			selectedSection.style.display = 'block';
             gameVisible1x1();
         }
         else if (sectionId === 'online-4') {
+			selectedSection.style.display = 'block';
             gameVisible4();
         }
+		else {
+			selectedSection.style.display = 'block';
+		}
     }
 
 
@@ -123,26 +141,26 @@ document.addEventListener('DOMContentLoaded', function() {
         showSection(sectionId);
     });
     const initialSection = window.location.hash.substring(1) || 'offline-choose-mode';
-    showSection(initialSection);
-
+	showSection(initialSection);
+	
    // Buttons listeners for online games:
     $(document).on('click', '.btn-2pl-game', function(event) {
 		console.log('Online 1x1 game clicked');
         sendLog('info', 'Online 1x1 game clicked');
-		hideElement(document.getElementById('get-started'));
+		//hideElement(document.getElementById('get-started'));
 		event.preventDefault();
         window.location.hash = 'online-1x1';
 	});
 
 	$(document).on('click', '.btn-4pl-game', function(event) {
 		console.log('Online 4x4 game clicked');
-		hideElement(document.getElementById('get-started'));
+		//hideElement(document.getElementById('get-started'));
 		event.preventDefault();
         window.location.hash = 'online-4';
 	});
 
     $(document).on('click', '.btn-online-tour', function(event) {
-        hideElement(document.getElementById('get-started'));
+        //hideElement(document.getElementById('get-started'));
         event.preventDefault();
         window.location.hash = 'tour-hall';
 	});
@@ -229,8 +247,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				console.log(data.msg);
 				window.csrf = data.csrf_token;
 				hideElement(loginFormDiv);
-				showElement(getStartedDiv);
-                window.location.hash = 'get-started';
+				
+				// commented this out to prevent the get-started section from showing up after login
+				// now the main show section is controlled by the hashchange event listener
+				// showElement(getStartedDiv);
+
+				window.location.hash = 'get-started';
 			},
 			error: function(xhr, status, error) {
 				let errorMsg = "Error";
