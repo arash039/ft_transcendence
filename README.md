@@ -144,3 +144,257 @@ Key functions and features:
 - Tournament management, including updating the tournament chart and assigning players to matches.
 
 
+# 4-Player Pong Game
+
+This project is a 4-player online Pong game built using JavaScript for the frontend and Django Channels for the backend. The game allows four players to join a session and play Pong in real-time. The game state is synchronized across all players using WebSockets.
+
+## Table of Contents
+
+- Installation
+- Usage
+- Frontend
+- Backend
+- [WebSocket Communication](#websocket-communication)
+- [Game Logic](#game-logic)
+- [Error Handling](#error-handling)
+
+## Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/4player-pong.git
+   cd 4player-pong
+   ```
+
+2. **Install dependencies:**
+   - **Backend:**
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - **Frontend:**
+     Ensure you have a web server to serve the HTML and JavaScript files.
+
+3. **Set up Django:**
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+
+4. **Run the Django development server:**
+   ```bash
+   python manage.py runserver
+   ```
+
+## Usage
+
+1. **Start the backend server:**
+   ```bash
+   python manage.py runserver
+   ```
+
+2. **Open the frontend in a web browser:**
+   Navigate to `http://localhost:8000` (or the appropriate URL if using a different server).
+
+3. **Join a game session:**
+   - Players can join a game session by logging in and navigating to the game page.
+   - Once four players have joined, the game will start automatically.
+
+## Frontend
+
+The frontend is implemented in [`4player.js`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/django_backend/game/static/js/4player.js"). It handles the following:
+
+- **HTML Setup:**
+  - Dynamically generates the game area and player elements.
+  - Displays messages and scores.
+
+- **WebSocket Connection:**
+  - Establishes a WebSocket connection to the backend.
+  - Sends paddle movement data to the server.
+  - Receives game state updates and other messages from the server.
+
+- **Event Listeners:**
+  - Listens for keydown events to move paddles.
+  - Updates the game state based on server messages.
+
+## Backend
+
+The backend is implemented in [`consumers_4pl.py`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/django_backend/game/consumers_4pl.py") using Django Channels. It handles the following:
+
+- **WebSocket Consumer:**
+  - Manages WebSocket connections for each player.
+  - Handles player join, disconnect, and rejoin events.
+  - Manages game sessions and game state.
+
+- **Game Logic:**
+  - Updates the game state based on paddle movements and ball collisions.
+  - Checks for goals and out-of-bounds conditions.
+  - Determines the winner and ends the game when a player reaches the goal limit.
+
+## WebSocket Communication
+
+The frontend and backend communicate via WebSockets. The following message types are used:
+
+- **From Client to Server:**
+  - [`paddle_move`](command:_github.copilot.openSymbolFromReferences?%5B%22paddle_move%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A47%2C%22character%22%3A11%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A115%2C%22character%22%3A22%7D%7D%5D%5D "Go to definition"): Sent when a player moves their paddle.
+
+- **From Server to Client:**
+  - [`player_joined`](command:_github.copilot.openSymbolFromReferences?%5B%22player_joined%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A55%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A349%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent when a player joins the game.
+  - [`both_players_joined`](command:_github.copilot.openSymbolFromReferences?%5B%22both_players_joined%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A58%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A339%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent when all players have joined.
+  - [`countdown`](command:_github.copilot.openSymbolFromReferences?%5B%22countdown%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A66%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A368%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent during the game start countdown.
+  - [`game_started`](command:_github.copilot.openSymbolFromReferences?%5B%22game_started%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A73%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A377%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent when the game starts.
+  - [`game_state_update`](command:_github.copilot.openSymbolFromReferences?%5B%22game_state_update%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A69%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A385%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent to update the game state.
+  - [`game_stop`](command:_github.copilot.openSymbolFromReferences?%5B%22game_stop%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A80%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A394%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent when the game stops.
+  - [`game_over`](command:_github.copilot.openSymbolFromReferences?%5B%22game_over%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fstatic%2Fjs%2F4player.js%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A84%2C%22character%22%3A9%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Fdjango_backend%2Fgame%2Fconsumers_4pl.py%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A403%2C%22character%22%3A11%7D%7D%5D%5D "Go to definition"): Sent when the game is over.
+
+## Game Logic
+
+The game logic is implemented in the backend and includes:
+
+- **Paddle Movement:**
+  - Updates paddle positions based on player input.
+
+- **Ball Movement:**
+  - Updates ball position and checks for collisions with paddles and walls.
+
+- **Scoring:**
+  - Updates scores based on goals.
+  - Ends the game when a player reaches the goal limit.
+
+## Error Handling
+
+The backend includes error handling for various scenarios:
+
+- **WebSocket Errors:**
+  - Logs errors and sends error messages to the client.
+
+- **Game State Errors:**
+  - Handles exceptions during game state updates and logs errors.
+
+- **Player Disconnects:**
+  - Manages player disconnects and allows players to rejoin within a timeout period.
+
+
+# Elasticsearch Docker Setup
+
+This repository contains the necessary files to set up an Elasticsearch instance using Docker. The setup includes custom configurations, index templates, and ILM policies.
+
+## Files
+
+- [`Dockerfile`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2FDockerfile%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/Dockerfile"): Defines the Docker image for Elasticsearch.
+- [`start_elasticsearch.sh`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/elasticsearch/start_elasticsearch.sh"): Script to initialize Elasticsearch with SSL certificates and passwords.
+- [`ilm-policy.json`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Film-policy.json%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/elasticsearch/ilm-policy.json"): ILM policy configuration.
+- [`index-template.json`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Findex-template.json%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/elasticsearch/index-template.json"): Index template configuration.
+- [`elasticsearch.yml`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Felasticsearch.yml%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/elasticsearch/elasticsearch.yml"): Elasticsearch configuration file.
+
+## Prerequisites
+
+- Docker installed on your machine.
+- Environment variables [`SSL_CERT`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_CERT%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"), [`SSL_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"), and [`ELASTIC_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition") set.
+
+## Setup
+
+1. **Build the Docker Image:**
+
+    ```sh
+    docker build -t custom-elasticsearch .
+    ```
+
+2. **Run the Docker Container:**
+
+    ```sh
+    docker run -d --name elasticsearch -p 9200:9200 -e SSL_CERT="your_ssl_cert" -e SSL_KEY="your_ssl_key" -e ELASTIC_PASSWORD="your_elastic_password" custom-elasticsearch
+    ```
+
+## Configuration Details
+
+### Dockerfile
+
+The [`Dockerfile`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2FDockerfile%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/Dockerfile") sets up the Elasticsearch image with custom configurations and scripts.
+
+### start_elasticsearch.sh
+
+This script initializes Elasticsearch with SSL certificates and sets the password for the [`elastic`](command:_github.copilot.openSymbolFromReferences?%5B%22elastic%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A12%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A12%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A22%2C%22character%22%3A16%7D%7D%5D%5D "Go to definition") user.
+
+### ilm-policy.json
+
+Defines the Index Lifecycle Management (ILM) policy for managing index phases.
+
+### index-template.json
+
+Defines the index template for Elasticsearch indices.
+
+### elasticsearch.yml
+
+Configuration file for Elasticsearch, enabling security and SSL settings.
+
+## Notes
+
+- Ensure the environment variables [`SSL_CERT`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_CERT%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"), [`SSL_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"), and [`ELASTIC_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition") are set before running the container.
+- The script [`start_elasticsearch.sh`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/elasticsearch/start_elasticsearch.sh") will create necessary SSL certificates and set the password for the [`elastic`](command:_github.copilot.openSymbolFromReferences?%5B%22elastic%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A12%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2FDockerfile%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A12%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Felasticsearch%2Fstart_elasticsearch.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A22%2C%22character%22%3A16%7D%7D%5D%5D "Go to definition") user.
+
+# Kibana Docker Setup
+
+This repository contains the necessary files to set up a Kibana instance using Docker. The setup includes SSL configuration and user management for secure access.
+
+## Prerequisites
+
+- Docker installed on your machine
+- Environment variables set for:
+  - [`SSL_CERT`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_CERT%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): SSL certificate content
+  - [`SSL_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): SSL key content
+  - [`ELASTIC_USERNAME`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_USERNAME%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A18%2C%22character%22%3A21%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A18%2C%22character%22%3A21%7D%7D%5D%5D "Go to definition"): Elasticsearch username
+  - [`ELASTIC_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): Elasticsearch password
+  - [`KIBANA_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22KIBANA_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A23%2C%22character%22%3A173%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A23%2C%22character%22%3A173%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A4%2C%22character%22%3A27%7D%7D%5D%5D "Go to definition"): Kibana user password
+  - [`NEW_USER_KIBANA`](command:_github.copilot.openSymbolFromReferences?%5B%22NEW_USER_KIBANA%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A24%2C%22character%22%3A103%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A24%2C%22character%22%3A103%7D%7D%5D%5D "Go to definition"): New Kibana user
+  - [`KIBANA_ENCRYPTION_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22KIBANA_ENCRYPTION_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A33%7D%7D%5D%5D "Go to definition"): Kibana encryption key
+  - [`SAVED_OBJECTS_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SAVED_OBJECTS_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A46%7D%7D%5D%5D "Go to definition"): Saved objects encryption key
+  - [`REPORTING_ENCRYPTIONKEY`](command:_github.copilot.openSymbolFromReferences?%5B%22REPORTING_ENCRYPTIONKEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A13%2C%22character%22%3A34%7D%7D%5D%5D "Go to definition"): Reporting encryption key
+
+## Files
+
+### [`start_kibana.sh`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/kibana/start_kibana.sh")
+
+This script sets up the necessary certificates, waits for Elasticsearch to start, creates Kibana users, and starts the Kibana service.
+
+### [`kibana.yml`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/elk/kibana/kibana.yml")
+
+Configuration file for Kibana, including SSL settings and Elasticsearch connection details.
+
+### [`Dockerfile`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2FDockerfile%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/ashojach/Desktop/main/Dockerfile")
+
+Dockerfile to build the Kibana Docker image with the necessary configurations and scripts.
+
+## Usage
+
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+
+2. Build the Docker image:
+   ```sh
+   docker build -t kibana-custom .
+   ```
+
+3. Run the Docker container:
+   ```sh
+   docker run -d --name kibana -e SSL_CERT="$SSL_CERT" -e SSL_KEY="$SSL_KEY" -e ELASTIC_USERNAME="$ELASTIC_USERNAME" -e ELASTIC_PASSWORD="$ELASTIC_PASSWORD" -e KIBANA_PASSWORD="$KIBANA_PASSWORD" -e NEW_USER_KIBANA="$NEW_USER_KIBANA" -e KIBANA_ENCRYPTION_KEY="$KIBANA_ENCRYPTION_KEY" -e SAVED_OBJECTS_KEY="$SAVED_OBJECTS_KEY" -e REPORTING_ENCRYPTIONKEY="$REPORTING_ENCRYPTIONKEY" -p 5601:5601 kibana-custom
+   ```
+
+## Environment Variables
+
+Ensure the following environment variables are set before running the Docker container:
+
+- [`SSL_CERT`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_CERT%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A10%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): SSL certificate content
+- [`SSL_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SSL_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): SSL key content
+- [`ELASTIC_USERNAME`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_USERNAME%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A18%2C%22character%22%3A21%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A18%2C%22character%22%3A21%7D%7D%5D%5D "Go to definition"): Elasticsearch username
+- [`ELASTIC_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22ELASTIC_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A7%7D%7D%5D%5D "Go to definition"): Elasticsearch password
+- [`KIBANA_PASSWORD`](command:_github.copilot.openSymbolFromReferences?%5B%22KIBANA_PASSWORD%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A23%2C%22character%22%3A173%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A23%2C%22character%22%3A173%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A4%2C%22character%22%3A27%7D%7D%5D%5D "Go to definition"): Kibana user password
+- [`NEW_USER_KIBANA`](command:_github.copilot.openSymbolFromReferences?%5B%22NEW_USER_KIBANA%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A24%2C%22character%22%3A103%7D%7D%2C%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fstart_kibana.sh%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A24%2C%22character%22%3A103%7D%7D%5D%5D "Go to definition"): New Kibana user
+- [`KIBANA_ENCRYPTION_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22KIBANA_ENCRYPTION_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A11%2C%22character%22%3A33%7D%7D%5D%5D "Go to definition"): Kibana encryption key
+- [`SAVED_OBJECTS_KEY`](command:_github.copilot.openSymbolFromReferences?%5B%22SAVED_OBJECTS_KEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A12%2C%22character%22%3A46%7D%7D%5D%5D "Go to definition"): Saved objects encryption key
+- [`REPORTING_ENCRYPTIONKEY`](command:_github.copilot.openSymbolFromReferences?%5B%22REPORTING_ENCRYPTIONKEY%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22external%22%3A%22file%3A%2F%2F%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22path%22%3A%22%2Fhome%2Fashojach%2FDesktop%2Fmain%2Felk%2Fkibana%2Fkibana.yml%22%2C%22scheme%22%3A%22file%22%7D%2C%22pos%22%3A%7B%22line%22%3A13%2C%22character%22%3A34%7D%7D%5D%5D "Go to definition"): Reporting encryption key
+
+
+
