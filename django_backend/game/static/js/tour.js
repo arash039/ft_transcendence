@@ -1,103 +1,213 @@
-document.addEventListener('DOMContentLoaded', function() {
-	const username = document.getElementById('username').textContent;
-	const tournamentSocket = new WebSocket(
-		'ws://' + window.location.host + '/ws/tournament/'
-	);
+export async function startTournament() {
+	var username;
+	try {
+        const response = await fetch('/api/get-username/');
+        const data = await response.json();
+        username = data.username;
+        console.log(username);
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        return;
+    }
+	
+	const onlineTourHtml = `
+		<div id="tournament-page">
+            <p class="text-center" id="logo-big">PONG 3.1</p>
+            <p class="text-center" id ="sublitle">${TOUR}</p>
+			<p class="welcome">${WELCOME}, <span id="usernames"></span>!</p>
+			<div id="champ"></div>
+			<div id="info"></div>
+			<div class="tournament">
+				<div class="round" id="semi-finals">
+					<h2 class="text-center">${SEMI_FIN}:</h2>
+					<div class="match" id="match-semi-final-0">
+						<h3>${MATCH} 1</h3>
+						<p class="player player1">${WAITING_TOUR}</p>
+						<p class="vs">vs</p>
+						<p class="player player2">${WAITING_TOUR}</p>
+					</div>
+					<div class="match" id="match-semi-final-1">
+						<h3>${MATCH} 2</h3>
+						<p class="player player1">${WAITING_TOUR}</p>
+						<p class="vs">vs</p>
+						<p class="player player2">${WAITING_TOUR}</p>
+					</div>
+				</div>
+				<div class="round">
+					<h2 class="text-center">${FINAL_TOUR}</h2>
+					<div class="match" id="match-final">
+						<h3>Final Match</h3>
+						<p class="player player1">${WAITING_TOUR}</p>
+						<p class="vs">vs</p>
+						<p class="player player2">${WAITING_TOUR}</p>
+					</div>
+				</div>
+			</div>
+			<button id="go-to-match" class="hidden match-button">${GO_TO_MATCH}</button>
+		</div>
+	`;
+	console.log('username =', username);
+	const tourHallElement = document.getElementById('tour-hall');
+	if (tourHallElement) {
+		tourHallElement.innerHTML = onlineTourHtml;
+		showElement(tourHallElement);
+		window.location.hash = 'tour-hall';
+	} else {
+		console.error('tour-hall element not found');
+		return;
+	}
 
+	const tournamentSocket = new WebSocket(
+		'wss://' + window.location.host + '/wss/tournament/'
+	);
+	document.getElementById('usernames').textContent = username;
 	tournamentSocket.onmessage = (event) => {
 		const data = JSON.parse(event.data);
 		console.log(data);
 		switch (data.type) {
 			case 'update_tournament_chart':
-				console.log('Tournament data received', data.tournament);
 				updateTournament(data.tournament);
-				if (data.champion || data.tournament.final.winner) {
-					console.log('Champion is', data.champion);
+				if (data.champion) {
 					const championElement = document.getElementById('champ');
-					championElement.textContent =  '\u{1F451}' + data.champion +  '\u{1F451}';
-				} 
-				break;
-			case 'go_to_game':
-				console.log('Game is ready', data.username);
-				updateTournament(data.tournament);
-				if (data.game_ready) {
-					const goToMatchButton = document.getElementById('go-to-match');
-					goToMatchButton.classList.remove('hidden');
-					goToMatchButton.setAttribute('data-session-id', data.session_id);
-					
-				} else {
-					const goToMatchButton = document.getElementById('go-to-match');
-					goToMatchButton.classList.add('hidden');
+					if (championElement) {
+						championElement.textContent =  '\u{1F451}' + data.champion +  '\u{1F451}';
+					}
 				}
 				break;
-
+			case 'go_to_game':
+				updateTournament(data.tournament);
+				const goToMatchButton = document.getElementById('go-to-match');
+				if (goToMatchButton) {
+					if (data.game_ready) {
+						goToMatchButton.classList.remove('hidden');
+						goToMatchButton.setAttribute('data-session-id', data.session_id);
+					} else {
+						goToMatchButton.classList.add('hidden');
+					}
+				}
+				break;
 			case 'go_back_to_home':
-				console.log(data);
 				const infoElement = document.getElementById('info');
-				infoElement.textContent = data.message;
+				if (infoElement) infoElement.textContent = `${GAME_OVER2}`;
+				const goToMatchButtons = document.getElementById('go-to-match');
+				if (goToMatchButtons) goToMatchButtons.classList.add('hidden');
 				tournamentSocket.close();
-				// setTimeout(() => {
-				// 	window.location.href = '/';
-				// }
-				// , 3000);
 				break;
 		}
-	};
-
-	tournamentSocket.onopen = function(e) {
-		tournamentSocket.send(JSON.stringify({
-			'action': 'join',
-			'username': username
-		}));
 	};
 
 	tournamentSocket.onclose = function(e) {
-		console.error('Tournament socket closed unexpectedly');
+		const infoElement = document.getElementById('info');
+		if (infoElement) {
+			switch (e.code) {
+				case 3001:
+					infoElement.textContent = `${ALREADY_TOUR}`;
+					break;
+				case 3002:
+					infoElement.textContent = `${FULL_TOUR}`;
+					break;
+			}
+		}
+	};
+
+	tournamentSocket.onerror = function(e) {
+		console.log('Error', e);
 	};
 
 	const goToMatchButton = document.getElementById('go-to-match');
-	goToMatchButton.addEventListener('click', function() {
-		tournamentSocket.send(JSON.stringify({
-			'action': 'going_to_game',
-			'username': username
-		}));
-		const sessionId = goToMatchButton.getAttribute('data-session-id');
-		window.location.href = "/tour_game/" + sessionId + "/";
-	});
+	if (goToMatchButton) {
+		$(document).on('click', '.match-button', function(event) {
+			tournamentSocket.send(JSON.stringify({
+				'action': 'going_to_game',
+				'username': username
+			}));
+			setTimeout(() => {
+				tournamentSocket.close();
+				const sessionId = goToMatchButton.getAttribute('data-session-id');
+				hideElement(document.getElementById('tour-hall'));
+				event.preventDefault();
+				window.location.hash = "tour-game!" + sessionId;
+				import('./tour_game.js').then(module => {
+					module.startGame(sessionId, tournamentSocket);
+				});
+			}, 1000);
+		});
+	}
 
 	function updateTournament(tournament) {
-		// Update semi-finals
+		document.getElementById('usernames').textContent = username;
 		for (let i = 0; i < tournament.semi_finals.length; i++) {
 			const match = tournament.semi_finals[i];
-			const matchElement = document.getElementById(`match-semi-finals-${i}`);
-			matchElement.querySelector('.player1').textContent = match.player1 || 'Waiting for player';
-			matchElement.querySelector('.player2').textContent = match.player2 || 'Waiting for player';
-			if (match.winner && match.winner == match.player1) {
-				matchElement.querySelector('.player1').style.fontWeight = 'bold';
-				matchElement.querySelector('.player2').style.fontWeight = 'normal';
-			} else if (match.winner && match.winner == match.player2) {
-				matchElement.querySelector('.player2').style.fontWeight = 'bold';
-				matchElement.querySelector('.player1').style.fontWeight = 'normal';
-			} else {
-				matchElement.querySelector('.player1').style.fontWeight = 'normal';
-				matchElement.querySelector('.player2').style.fontWeight = 'normal';
+			const matchElement = document.getElementById(`match-semi-final-${i}`);
+			console.log(`Checking match-semi-final-${i}`, matchElement);
+			if (matchElement) {
+				const player1Element = matchElement.querySelector('.player1');
+				const player2Element = matchElement.querySelector('.player2');
+				
+				console.log(match.player1, match.player2);
+				if (player1Element) player1Element.textContent = match.player1 || `${WAITING_TOUR}`;
+				if (player2Element) player2Element.textContent = match.player2 || `${WAITING_TOUR}`;
+
+				if (match.winner) {
+					if (match.winner === match.player1) {
+						if (player1Element) player1Element.style.fontWeight = 'bold';
+						if (player1Element) player1Element.style.color = 'gold';
+						if (player2Element) player2Element.style.fontWeight = 'normal';
+					} else if (match.winner === match.player2) {
+						if (player2Element) player2Element.style.fontWeight = 'bold';
+						if (player2Element) player2Element.style.color = 'gold';
+						if (player1Element) player1Element.style.fontWeight = 'normal';
+					}
+				} else {
+					if (player1Element) player1Element.style.fontWeight = 'normal';
+					if (player2Element) player2Element.style.fontWeight = 'normal';
+				}
 			}
 		}
 
-		// Update final
 		const finalMatch = tournament.final;
 		const finalMatchElement = document.getElementById('match-final');
-		finalMatchElement.querySelector('.player1').textContent = finalMatch.player1 || 'Waiting for player';
-		finalMatchElement.querySelector('.player2').textContent = finalMatch.player2 || 'Waiting for player';
-		if (finalMatch.winner && finalMatch.winner == finalMatch.player1) {
-			finalMatchElement.querySelector('.player1').style.fontWeight = 'bold';
-			finalMatchElement.querySelector('.player2').style.fontWeight = 'normal';
-		} else if (finalMatch.winner && finalMatch.winner == finalMatch.player2) {
-			finalMatchElement.querySelector('.player2').style.fontWeight = 'bold';
-			finalMatchElement.querySelector('.player1').style.fontWeight = 'normal';
-		} else {
-			finalMatchElement.querySelector('.player1').style.fontWeight = 'normal';
-			finalMatchElement.querySelector('.player2').style.fontWeight = 'normal';
+		if (finalMatchElement) {
+			const finalPlayer1Element = finalMatchElement.querySelector('.player1');
+			const finalPlayer2Element = finalMatchElement.querySelector('.player2');
+
+			if (finalPlayer1Element) finalPlayer1Element.textContent = finalMatch.player1 || `${WAITING_TOUR}`;
+			if (finalPlayer2Element) finalPlayer2Element.textContent = finalMatch.player2 || `${WAITING_TOUR}`;
+
+			if (finalMatch.winner) {
+				if (finalMatch.winner === finalMatch.player1) {
+					if (finalPlayer1Element) finalPlayer1Element.style.fontWeight = 'bold';
+					if (finalPlayer1Element) finalPlayer1Element.style.color = 'gold';
+					if (finalPlayer2Element) finalPlayer2Element.style.fontWeight = 'normal';
+				} else if (finalMatch.winner === finalMatch.player2) {
+					if (finalPlayer2Element) finalPlayer2Element.style.fontWeight = 'bold';
+					if (finalPlayer2Element) finalPlayer2Element.style.color = 'gold';
+					if (finalPlayer1Element) finalPlayer1Element.style.fontWeight = 'normal';
+				}
+			} else {
+				if (finalPlayer1Element) finalPlayer1Element.style.fontWeight = 'normal';
+				if (finalPlayer2Element) finalPlayer2Element.style.fontWeight = 'normal';
+			}
 		}
 	}
-});
+
+	function cleanupGame() {
+		console.log('Cleaning up game');
+		tournamentSocket.close();
+		deactivateListeners();
+		//history.pushState(null, '', window.location.href);
+	};
+
+	function deactivateListeners() {
+		window.removeEventListener('beforeunload', cleanupGame);
+		window.removeEventListener('popstate', cleanupGame);
+		$(document).off('click', '.match-button');
+	}
+	
+	function setupEventListeners() {
+		window.addEventListener('beforeunload', cleanupGame);
+		window.addEventListener('popstate', cleanupGame);
+	}
+
+	setupEventListeners();
+}

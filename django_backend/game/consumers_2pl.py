@@ -25,8 +25,10 @@ User = get_user_model() # get the user data model from the Django auth module
 class PongConsumer(AsyncWebsocketConsumer):
 	game_sessions = {}
 	disconnected_players = {}
-	rejoin_timeout = 10  # should be changed to a better amount
-
+	rejoin_timeout = 30  # should be changed to a better amount
+	dx = 4.5
+	dy = 4.5
+	fps = 50
 	
 	
 	# 												***	websocket connection handling ***
@@ -45,6 +47,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 				session_id = self.disconnected_players[user.username]['session_id']
 				print("session id: ", session_id)
 				if time.time() < self.disconnected_players[user.username]['rejoin_deadline']:
+					rejoin_task = self.disconnected_players[user.username].get('rejoin_task')
+					if rejoin_task:
+						rejoin_task.cancel()
 					self.session_id = session_id
 					self.add_player_to_session(session_id, user.username, self.channel_name)
 					await self.channel_layer.group_add(session_id, self.channel_name)
@@ -66,14 +71,22 @@ class PongConsumer(AsyncWebsocketConsumer):
 					del self.disconnected_players[user.username]
 					print(f"Rejoin deadline expired for player {user.username}")
 					return
-
+		
+			# check if the user is already in a game session, if yes, then close the connection with code 3001
+			# the close code is used to send a specific close messages to the client
+			for session in self.game_sessions.values():
+				if user.username in session['players'].values():
+					print(f"Player {user.username} has already joined a game session.")
+					await self.close(code = 3001)
+					return
+		
 			session_id = self.get_available_session() # handle new user connection
 			if session_id:
 				self.session_id = session_id
 				self.add_player_to_session(session_id, user.username, self.channel_name)
 				await self.channel_layer.group_add(session_id, self.channel_name)
 				await self.channel_layer.group_send(
-					session_id,
+					self.session_id,
 					{
 						'type': 'player_joined',
 						'name': user.username
@@ -82,10 +95,10 @@ class PongConsumer(AsyncWebsocketConsumer):
 				if len(self.game_sessions[session_id]['players']) == 2:
 					self.countdown_task = asyncio.create_task(self.start_game_countdown(session_id))
 			else:
-				await self.close()
+				await self.close(code = 3002)
 				print("Connection closed: no available game session")
 		else:
-			await self.close()
+			await self.close(code = 3003)
 			print("Connection closed for unauthenticated user")
 
 
@@ -99,17 +112,30 @@ class PongConsumer(AsyncWebsocketConsumer):
 			player_name = self.game_sessions[self.session_id]['players'].pop(self.channel_name, None)
 			other_player = next(iter(self.game_sessions[self.session_id]['players'].values()), None)
 			if player_name:
+				rejoin_task = asyncio.create_task(self.check_player_rejoin_timeout(self.session_id, player_name, other_player))
 				self.disconnected_players[player_name] = {
 					'session_id': self.session_id,
 					'rejoin_deadline': time.time() + self.rejoin_timeout,
-					'opponent': other_player
+					'opponent': other_player,
+					'rejoin_task': rejoin_task
 				}
 				await self.channel_layer.group_discard(self.session_id, self.channel_name)
 				print(f"Player {player_name} disconnected from session {self.session_id}")
 				if 'game_loop_task' in self.game_sessions[self.session_id]:
-					self.game_sessions[self.session_id]['game_loop_task'].cancel()
-					self.game_sessions[self.session_id]['game_loop_task'] = None
-				asyncio.create_task(self.check_player_rejoin_timeout(self.session_id, player_name, other_player))	
+					if self.game_sessions[self.session_id]['game_loop_task']:
+						self.game_sessions[self.session_id]['game_loop_task'].cancel()
+						self.game_sessions[self.session_id]['game_loop_task'] = None
+				if len(self.game_sessions[self.session_id]['players']) == 0:
+					print(f"Game session {self.session_id} closed due to both player disconnection.")
+					if player_name in self.disconnected_players:
+						for key in list(self.disconnected_players.keys()):
+							if self.disconnected_players[key]['session_id'] == self.session_id:
+								print(f"Player {key} deleted from disconnected players.")
+								del self.disconnected_players[key]
+					await self.delete_game_session(self.session_id)
+					return
+				#asyncio.create_task(self.check_player_rejoin_timeout(self.session_id, player_name, other_player))
+				
 					
 
 
@@ -126,14 +152,17 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 	async def move_paddle(self, key):
 		user = self.scope['user']
-		if user.username == list(self.game_sessions[self.session_id]['players'].values())[1]:
-			paddle = 'paddle1'
-		else:
-			paddle = 'paddle2'
-		if key == 'ArrowUp' and self.game_sessions[self.session_id]['game_state'][paddle] > 0:
-			self.game_sessions[self.session_id]['game_state'][paddle] -= 10
-		elif key == 'ArrowDown' and self.game_sessions[self.session_id]['game_state'][paddle] < 300:
-			self.game_sessions[self.session_id]['game_state'][paddle] += 10
+		try:
+			if user.username == list(self.game_sessions[self.session_id]['players'].values())[1]:
+				paddle = 'paddle1'
+			else:
+				paddle = 'paddle2'
+			if key == 'ArrowUp' and self.game_sessions[self.session_id]['game_state'][paddle] > 5:
+				self.game_sessions[self.session_id]['game_state'][paddle] -= 15
+			elif key == 'ArrowDown' and self.game_sessions[self.session_id]['game_state'][paddle] < 485:
+				self.game_sessions[self.session_id]['game_state'][paddle] += 15
+		except Exception as e:
+			print(f"Error exception moving paddle: {e}")
 
 
 
@@ -152,10 +181,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 		self.game_sessions[new_session_id] = {
 			'players': {},
 			'game_state': {
-				'ball': {'x': 390, 'y': 190, 'dx': 5, 'dy': 5},
-				'paddle1': 160,
-				'paddle2': 160,
-				'score': {'player1': 0, 'player2': 0}
+				'ball': {'x': 450, 'y': 290, 'dx': self.dx, 'dy': self.dy},
+				'paddle1': 260,
+				'paddle2': 260,
+				'score': {'player1': 0, 'player2': 0},
+				'goal': False
 			},
 			'game_loop_task': None
 		}
@@ -172,27 +202,31 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# and close the game session
 
 	async def check_player_rejoin_timeout(self, session_id, disconnected_player, other_player):
-		if len(self.game_sessions[session_id]['players']) == 1:
-			await self.channel_layer.group_send(
-				self.session_id,
-				{
-					'type': 'game_stop',
-					'message': 'wait for the opponent to rejoin...'
-				}
-			)
-		await asyncio.sleep(self.rejoin_timeout)
-		if disconnected_player in self.disconnected_players and self.disconnected_players[disconnected_player]['session_id'] == session_id:
-			del self.disconnected_players[disconnected_player]
-			if other_player:
+		try:
+			if len(self.game_sessions[session_id]['players']) == 1:
 				await self.channel_layer.group_send(
-					session_id,
+					self.session_id,
 					{
-						'type': 'game_over',
-						'winner': other_player
+						'type': 'game_stop',
+						'message': f"wait till {self.rejoin_timeout} seconds for the opponent to rejoin..."
 					}
 				)
-				print(f"Player {disconnected_player} did not rejoin in time. {other_player} wins by default.")
-				await self.close_game_session(session_id, other_player)
+			print (self.disconnected_players)
+			await asyncio.sleep(self.rejoin_timeout)
+			if disconnected_player in self.disconnected_players and self.disconnected_players[disconnected_player]['session_id'] == session_id:
+				del self.disconnected_players[disconnected_player]
+				if other_player:
+					await self.channel_layer.group_send(
+						session_id,
+						{
+							'type': 'game_over',
+							'winner': other_player
+						}
+					)
+					print(f"Player {disconnected_player} did not rejoin in time. {other_player} wins by default.")
+					await self.close_game_session(session_id, other_player)
+		except Exception as e:
+			print(f"Error exception checking player rejoin timeout: {e}")
 
 	async def close_game_session(self, session_id, winner):
 			game_session = self.game_sessions.pop(session_id, None)
@@ -206,6 +240,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 				}
 				await self.send_game_result(result, session_id, winner)
 				print(f"Game session {session_id} closed. Winner: {winner}")
+
+	async def delete_game_session(self, session_id):
+			game_session = self.game_sessions.pop(session_id, None)
+			if game_session:
+				for player_channel in game_session['players'].keys():
+					await self.channel_layer.group_discard(session_id, player_channel)
 
 
 
@@ -238,7 +278,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 				session_id,
 				{
 					'type': 'countdown',
-					'message': f"Game starts in {i} seconds..."
+					'message': f"{i}"
 				}
 			)
 			await asyncio.sleep(1)
@@ -251,36 +291,46 @@ class PongConsumer(AsyncWebsocketConsumer):
 		self.game_sessions[session_id]['game_loop_task'] = asyncio.create_task(self.game_loop(session_id))
 	
 	async def game_loop(self, session_id):
-		while len(self.game_sessions[session_id]['players']) == 2:
-			self.update_game_state(session_id)
-			await self.channel_layer.group_send(
-				session_id,
-				{
-					'type': 'game_state_update',
-					'game_state': self.game_sessions[session_id]['game_state']
-				}
-			)
-			await asyncio.sleep(0.033)
+		try:
+			while len(self.game_sessions[session_id]['players']) == 2:
+				self.update_game_state(session_id)
+				await self.channel_layer.group_send(
+					session_id,
+					{
+						'type': 'game_state_update',
+						'game_state': self.game_sessions[session_id]['game_state']
+					}
+				)
+				game_state = self.game_sessions[session_id]['game_state']
+				if game_state['goal']:
+					await asyncio.sleep(2)
+				else:
+					await asyncio.sleep(1/self.fps)
+		except Exception as e:
+			print(f"Error exception in game loop: {e}")
 
 	def update_game_state(self, session_id):
 		game_state = self.game_sessions[session_id]['game_state']
+		game_state['goal'] = False
 
 		game_state['ball']['x'] += game_state['ball']['dx']
 		game_state['ball']['y'] += game_state['ball']['dy']
 
-		if game_state['ball']['y'] <= 0 or game_state['ball']['y'] >= 380:
+		if game_state['ball']['y'] <= 0 or game_state['ball']['y'] >= 570:
 			game_state['ball']['dy'] *= -1
 
-		if (game_state['ball']['x'] <= 20 and game_state['paddle1'] <= game_state['ball']['y'] <= game_state['paddle1'] + 80):
+		if (game_state['ball']['x'] <= 15 and game_state['paddle1'] <= game_state['ball']['y'] <= game_state['paddle1'] + 100):
 			game_state['ball']['dx'] *= -1
-		elif (game_state['ball']['x'] >= 760 and game_state['paddle2'] <= game_state['ball']['y'] <= game_state['paddle2'] + 80):
+		elif (game_state['ball']['x'] >= 855 and game_state['paddle2'] <= game_state['ball']['y'] <= game_state['paddle2'] + 100):
 			game_state['ball']['dx'] *= -1
 
-		if game_state['ball']['x'] <= 0:
+		if game_state['ball']['x'] <= -5:
 			game_state['score']['player2'] += 1
+			game_state['goal'] = True
 			self.reset_ball(session_id)
-		elif game_state['ball']['x'] >= 780:
+		elif game_state['ball']['x'] >= 875:
 			game_state['score']['player1'] += 1
+			game_state['goal'] = True
 			self.reset_ball(session_id)
 
 		if game_state['score']['player1'] >= 2 or game_state['score']['player2'] >=2: # how many goals needed to win a game. change in this line and next line
@@ -295,16 +345,17 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 	def reset_ball(self, session_id):
 		game_state = self.game_sessions[session_id]['game_state']
-		game_state['ball']['x'] = 390
-		game_state['ball']['y'] = 190
-		game_state['ball']['dx'] = random.choice([-5, 5])
-		game_state['ball']['dy'] = random.choice([-5, 5])
+		game_state['ball']['x'] = 450
+		game_state['ball']['y'] = 290
+		game_state['ball']['dx'] = random.choice([-1 * self.dx, self.dx])
+		game_state['ball']['dy'] = random.choice([-1 * self.dy, self.dy])
+
 		
 	def reset_game(self, session_id):
 		self.game_sessions[session_id]['game_state'] = {
-			'ball': {'x': 390, 'y': 190, 'dx': 5, 'dy': 5},
-			'paddle1': 160,
-			'paddle2': 160,
+			'ball': {'x': 450, 'y': 290, 'dx': self.dx, 'dy': self.dy},
+			'paddle1': 260,
+			'paddle2': 260,
 			'score': {'player1': 0, 'player2': 0}
 		}
 		self.game_sessions[session_id]['players'] = {}
@@ -320,56 +371,80 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 
 	async def game_state_update(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'game_state',
-			'game_state': event['game_state']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'game_state',
+				'game_state': event['game_state']
+			}))
+		except Exception as e:
+			print(f"Error exception sending game state update: {e}")
 		
 	async def player_joined(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'player_joined',
-			'name': event['name']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'player_joined',
+				'name': event['name']
+			}))
+		except Exception as e:
+			print(f"Error exception sending player joined: {e}")
 
 	async def player_rejoined(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'player_rejoined',
-			'name': event['name'],
-			'opponent': event['opponent']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'player_rejoined',
+				'name': event['name'],
+				'opponent': event['opponent']
+			}))
+		except Exception as e:
+			print(f"Error exception sending player rejoined: {e}")
 		
 	async def both_players_joined(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'both_players_joined',
-			'message': 'Both players joined. Get ready!',
-			'name': event['name']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'both_players_joined',
+				'message': 'Both players joined. Get ready!',
+				'name': event['name']
+			}))
+		except Exception as e:
+			print(f"Error exception sending both players joined: {e}")
 		
 	async def countdown(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'countdown',
-			'message': event['message']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'countdown',
+				'message': event['message']
+			}))
+		except Exception as e:
+			print(f"Error exception sending countdown: {e}")
 		
 	async def game_over(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'game_over',
-			'winner': event['winner']
-		}))
-		await asyncio.sleep(2)
-		await self.close()
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'game_over',
+				'winner': event['winner']
+			}))
+			await asyncio.sleep(2)
+			await self.close()
+		except Exception as e:
+			print(f"Error exception sending game over: {e}")
 		
 	async def game_started(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'game_started',
-			'message': 'Game started!'
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'game_started',
+				'message': 'Game started!'
+			}))
+		except Exception as e:
+			print(f"Error exception sending game started: {e}")
 
 	async def game_stop(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'game_stop',
-			'message': event['message']
-		}))
+		try:
+			await self.send(text_data=json.dumps({
+				'type': 'game_stop',
+				'message': event['message']
+			}))
+		except Exception as e:
+			print(f"Error exception sending game stop: {e}")
 
 
 
@@ -381,35 +456,38 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 
 	async def send_game_result(self, result, session_id, winner):
-		user = self.scope['user']
-		opponent_username = result['players'][1] if user.username == result['players'][0] else result['players'][0]
-		opponent_user = await self.get_user_by_username(opponent_username)
+		try:
+			user = self.scope['user']
+			opponent_username = result['players'][1] if user.username == result['players'][0] else result['players'][0]
+			opponent_user = await self.get_user_by_username(opponent_username)
 
-		current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-		if result['winner'] == user.username:
-			winner = user.username
-			looser = opponent_username
-		else:
-			winner = opponent_username
-			looser = user.username
-		
-		historyString = f"{current_time}, {winner}, {looser};"
+			if result['winner'] == user.username:
+				winner = user.username
+				looser = opponent_username
+			else:
+				winner = opponent_username
+				looser = user.username
+			
+			historyString = f"{current_time}, {winner}, {looser};"
 
-		if result['winner'] == user.username:
-			await self.update_profile(user, 'wins', historyString)
-			await self.update_profile(opponent_user, 'losses', historyString)
-		else:
-			await self.update_profile(user, 'losses', historyString)
-			await self.update_profile(opponent_user, 'wins', historyString)
-		
-		asyncio.create_task(self.channel_layer.group_send(
-			session_id,
-			{
-				'type': 'game_over',
-				'winner': winner
-			}
-		))
+			if result['winner'] == user.username:
+				await self.update_profile(user, 'wins', historyString)
+				await self.update_profile(opponent_user, 'losses', historyString)
+			else:
+				await self.update_profile(user, 'losses', historyString)
+				await self.update_profile(opponent_user, 'wins', historyString)
+			
+			asyncio.create_task(self.channel_layer.group_send(
+				session_id,
+				{
+					'type': 'game_over',
+					'winner': winner
+				}
+			))
+		except Exception as e:
+			print(f"Error exception sending game result: {e}")
 	
 	@sync_to_async
 	def get_user_by_username(self, username):
@@ -432,7 +510,3 @@ class PongConsumer(AsyncWebsocketConsumer):
 		profile.match_history += historyString
 		profile.save()
 		#print("player stats: ", user.username, Profile.objects.get(user=user).losses, Profile.objects.get(user=user).wins)
-
-
-	
-	

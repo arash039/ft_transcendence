@@ -1,5 +1,6 @@
 django_backend/myenv/
 django_backend/db.sqlite3
+ssl/*
 *.pyc
 django_backend/*~
 __pycache__
@@ -20,3 +21,7 @@ Thumbs.db*
 ehthumbs*.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+#env
+.env
+

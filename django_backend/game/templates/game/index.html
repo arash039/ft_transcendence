@@ -4,10 +4,13 @@
 
 <!DOCTYPE html>
 <html lang="en">
+    
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PONG 3.0</title>
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <!-- Custom CSS -->
@@ -16,174 +19,474 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+
     <!-- Images -->
     <link rel="icon" href="{% static 'img/fav.ico' %}" type="image/x-icon">
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+   
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/index.js' %}" defer></script>
+
 </head>
 
 <body>
 
     <div class="container" id="screen"> <!-- 100vh container -->
-        {% block offline_game %}
-        {% block two_pl_game %}
-        {% block four_pl_game %}
-        {% block tournament %}
-        <!-- Language Switcher Dropdown -->
-        <div class="container mt-3">
-            <form id="languageForm" action="{% url 'set_language' %}" method="post" class="form-inline">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.path }}">
-                <div class="input-group">
-                    <select name="language" id="languageSelect" class="custom-select">
-                        {% for lang_code, lang_name in languages %}
-                            <option value="{{ lang_code }}" {% if lang_code == request.LANGUAGE_CODE %} selected {% endif %}>
-                                {{ lang_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </form>
-        </div>   
-        <script>
-            document.getElementById('languageSelect').addEventListener('change', function() {
-                document.getElementById('languageForm').submit();
-            });
-        </script>
-        
-        <!-- {% if user.is_authenticated %}
-        <a href="#" onClick="document.getElementById('logoutform').submit()">
-            <button type="button" class="btn btn-primary">Logout</button>
-        </a>
-        <form id="logoutform" method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <input type="hidden">
-        </form>
-        <a href="{% url 'profile' request.user.id %}">
-            <button type="button" class="btn btn-primary">Profile</button>
-        </a>
-        {% endif %} -->
-
-
+  
         <!-- Welcome page header with large logo -->
-        <div class="container" id="header-welcome">
+        <div id="header-welcome" class="container" style="display:none;">
             <p class="text-center" id="logo-big">PONG 3.1</p>
             <p class="text-center" id ="sublitle">{% translate "game that takes you to transcendence" %}</p>
         </div>
 
-        <div class="container" id="start">
+        <!-- Language Switcher Dropdown
+        <div id="language" class="container mt-3" style="display:none;">
             <div class="row justify-content-center">
-                {% if user.is_authenticated %}
-                    {% block user %}
-                    <!-- Menu buttons -->
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="btn-group">
-                                {% if user.is_authenticated %}
-                                    <form id="logoutform" method="POST" action="{% url 'logout' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden">
-                                    </form>
-                                    <a href="{% url 'profile' request.user.id %}" class="btn btn-outline-primary btn-sm">
-                                        👤 {% translate "Profile" %}
-                                    </a>
-                                    <button type="button" id="leaderboard" class="btn btn-outline-primary btn-sm">🏆 {% translate "Leaderboard" %}</button>
-                                    <a href="#" onClick="document.getElementById('logoutform').submit()" class="btn btn-outline-primary btn-sm">
-                                        ❌ {% translate "Log out" %}
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
+                <form id="languageForm" action="{% url 'set_language' %}" method="post" class="form-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="input-group">
+                        <select name="language" id="languageSelect" class="custom-select">
+                            {% for lang_code, lang_name in languages %}
+                                <option value="{{ lang_code }}" {% if lang_code == request.LANGUAGE_CODE %} selected {% endif %}>
+                                    {{ lang_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="btn-group-vertical">
-                        <div class="container" id="choose-mode">
-                            <!-- <a href="{% url 'game_start' %}" type="button" class="btn btn-outline-primary btn-lg btn-block">👈 {% translate "MENU" %}</a> -->
-                            <a href="{% url 'two_pl_game' %}" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Two players" %}</a>
-                            <a href="{% url 'four_pl_game' %}" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Four players" %}</a>
-                            <a href="{% url 'tournament' %}" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Tournament" %}</a>
-                        </div>
+                </form>
+                <script>
+                    document.getElementById('languageSelect').addEventListener('change', function() {
+                        document.getElementById('languageForm').submit();
+                    });
+                </script>
+            </div>
+        </div>  -->
+
+        <!-- Language Switcher Dropdown -->
+        <div id="language" class="container mt-3" style="display:none;">
+            <div class="row justify-content-center">
+                <form id="languageForm" action="{% url 'set_language' %}" method="post" class="form-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="input-group">
+                        <select name="language" id="languageSelect" class="custom-select">
+                            {% for lang_code, lang_name in languages %}
+                                <option value="{{ lang_code }}" {% if lang_code == request.LANGUAGE_CODE %} selected {% endif %}>
+                                    {{ lang_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    {% endblock user %} 
-                {% else %}
-                    {% block hello %}
-                    {% block content %}
-                    {% endblock %}
-                    {% endblock hello %}
-                {% endif %}
+                </form>
+                <script>
+                    function getCookie(name) {
+                        let cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            const cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim();
+                                // Does this cookie string begin with the name we want?
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+
+                    document.getElementById('languageSelect').addEventListener('change', function() {
+                        // Get CSRF token from cookie
+                        const csrftoken = getCookie('csrftoken');
+                        
+                        // Set the CSRF token in the form's hidden input field
+                        const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                        if (csrfInput) {
+                            csrfInput.value = csrftoken;
+                        }
+
+                        // Submit the form
+                        document.getElementById('languageForm').submit();
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div id="404-page-not-found" class="content-section" style="display:none;">
+            <br><br><br><br>
+            <p class="text-center" id ="sublitle" style="color: white; font-size: 50pt;">{% translate "Error 404" %}</p>
+            <p class="text-center" id ="sublitle" style="color: white;">{% translate "Page Not Found" %}</p>
+            <br>
+            <div id="back" class="container header-game">
+                <div class="row justify-content-center">
+                    <div class="row justify-content-center btn-group">
+                        <a href="#offline-choose-mode" type="button" class="btn btn-outline-primary btn-sm btn-block">👈 {% translate "MENU" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- OFFLINE!========================================================================================================== -->
+
+        <!-- Offline Tour header button-->
+        <div id="off-header-game" class="container header-game" style="display:none;">
+            <div class="row justify-content-center">
+                <div class="row justify-content-center btn-group">
+                    <a href="#offline-choose-mode" type="button" class="btn btn-outline-primary btn-sm btn-block">👈 {% translate "Return" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Exit Login button-->
+        <div id="off-exit-login" class="container header-game" style="display:none;">
+            <div class="row justify-content-center">
+                <div class="row justify-content-center btn-group">
+                    <a href="#offline-choose-mode" type="button" class="btn btn-outline-primary btn-sm btn-block">👈 {% translate "MENU" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline navigation block -->
+        <div id="offline-choose-mode" class="content-section choose-mode" style="display:none;">
+            <div class="row justify-content-center">
+                <div class="btn-group-vertical">
+                    <div class="container" id="choose-mode-online"> 
+                        <a href="#offline-ai" type="button" class="btn btn-outline-primary btn-lg btn-block offline-ai-button">{% translate "Play against AI" %}</a>
+                        <a href="#offline-1x1" type="button" class="btn btn-outline-primary btn-lg btn-block offline-1x1-button">{% translate "Play 1 x 1 offline" %}</a>
+                        <a href="#offline-tournament" type="button" class="btn btn-outline-primary btn-lg btn-block offline-tournament-button">{% translate "Offline Tournament" %}</a>
+                        <a href="#id-login" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Login and play online" %}</a>
+                    </div>
+                </div>
             </div>
         </div>
 
 
-        <!-- Menu buttons -->
-        <!-- <div class="container" id="start">
+        <!-- ONLINE!=========================================================================================================== -->
+        
+        <!-- Online header button-->
+        <div id="online-header-game" class="container header-game" style="display:none;">
             <div class="row justify-content-center">
-                <div class="btn-group-vertical">
-                    <button type="button" class="btn btn-outline-primary btn-lg btn-block" onclick="location.href='{% url 'two_pl_game' %}'">{% translate "Two players" %}</button>
-                    <button type="button" class="btn btn-outline-primary btn-lg btn-block" onclick="location.href='{% url 'four_pl_game' %}'">{% translate "Four players" %}</button>
+                <div class="row justify-content-center btn-group">
+                    <a href="#get-started" type="button" class="btn btn-outline-primary btn-sm btn-block">👈 {% translate "Exit the game" %}</a>
                 </div>
             </div>
+        </div>
+
+        <!-- Navigation horizontal buttons --> 
+        <div id="hor-nav" class="container">
+            <div class="row justify-content-center">
+                <div class="btn-group" role="group">
+                    <a href="#profile" type="button" class="btn btn-outline-primary btn-sm online-nav profile-link">👤 {% translate "Profile" %}</a>
+                    <a href="#profile-list-page" type="button" class="btn btn-outline-primary btn-sm online-nav profile-list-link">{% translate "Find New Friends" %}</a>
+                    <div id="id-logout">
+                        <form id="logoutform" method="POST" action="{% url 'json_logout' %}">
+                            {% csrf_token %}
+                            <input type="hidden">
+                            <a href="#offline-choose-mode" type="button" value="❌ Log out" class="btn btn-outline-primary btn-sm online-nav logout-link">❌ {% translate "Log out" %}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- Loading Animation -->
+		<div id="loading-animation" style="display: none;">
+			<!-- This can be a spinner, a CSS animation -->
+			<div class="spinner"></div>
+		</div>
+        <!--Get started = navigation vertical buttons --> 
+        <div id="get-started" class="content-section choose-mode" style="display:none;">
+            <div class="row justify-content-center">
+                    <div class="btn-group-vertical">
+                        <div class="container" id="choose-mode-online"> 
+                            <!-- <a href="#online-1x1" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Two players" %}</a>
+                            <a href="#online-4" type="button" class="btn btn-outline-primary btn-lg btn-block">{% translate "Four players" %}</a> -->
+                            <a href="#game-place" type="button" class="btn btn-outline-primary btn-lg btn-block btn-2pl-game">{% translate "Two players" %}</a>
+                            <a href="#game-place" type="button" class="btn btn-outline-primary btn-lg btn-block btn-4pl-game">{% translate "Four players" %}</a>
+                            <a href="#online-tournament" type="button" class="btn btn-outline-primary btn-lg btn-block btn-online-tour">{% translate "Tournament" %}</a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+        <!-- CONTENT PLACEHOLDER FOR GAMES & BLOCKCHAIN: -->
+		<div id="game-place" class="content-section" style="display:none;"></div>
+        <div id="offline-ai" class="content-section" style="display:none;"></div>
+        <div id="offline-1x1" class="content-section" style="display:none;"></div>
+        <div id="offline-tournament" class="content-section" style="display:none;"></div>
+        <div id="online-1x1" class="content-section" style="display:none;"></div>
+        <div id="online-4" class="content-section" style="display:none;"></div>
+        <div id="tour-hall" class="content-section tournament-hall" style="display:none;"></div>
+        <div id="tour-game" class="content-section tournament-hall" style="display:none;"></div>
+        <!-- Online Tournament -->
+        
+        <!-- USERS!========================================================================================================== -->
+        
+        <!-- Profile navigation buttons -->
+        <div id="profile-nav" class="container" id="profile-menu">
+            <div class="row justify-content-center">
+                <div class="btn-group">
+                    <a href="#get-started" type="button" class="btn btn-outline-primary btn-sm">👈 {% translate "MENU" %}</a>
+                    <a href="#profile-list-page" type="button" class="btn btn-outline-primary btn-sm profile-list-link">{% translate "Find New Friends" %}</a>
+                    <div id="id-logout">
+                        <form id="logoutform2" method="POST" action="{% url 'json_logout' %}">
+                            {% csrf_token %}
+                            <input type="hidden">
+                            <a href="#offline-choose-mode" type="button" value="❌ Log out" class="btn btn-outline-primary btn-sm online-nav logout-link">❌ {% translate "Log out" %}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile navigation buttons -->
+         <div id="profile-nav2" class="container" id="profile-menu">
+            <div class="row justify-content-center">
+                <div class="btn-group">
+                    <a href="#profile" type="button" class="btn btn-outline-primary btn-sm profile-link">👈 {% translate "Profile" %}</a>
+                    <a href="#profile-list-page" type="button" class="btn btn-outline-primary btn-sm profile-list-link">{% translate "Find New Friends" %}</a>
+                    <div id="id-logout">
+                        <form id="logoutform3" method="POST" action="{% url 'json_logout' %}">
+                            {% csrf_token %}
+                            <input type="hidden">
+                            <a href="#offline-choose-mode" type="button" value="❌ Log out" class="btn btn-outline-primary btn-sm online-nav logout-link">❌ {% translate "Log out" %}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login form -->
+        <div id="id-login" class="content-section" style="display: none;">
+            <div class="container"> 
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <p class="error-message"></p>
+                        <form id="login_form" method="POST" action="{% url 'json_login' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="login_name" class="form-label">{% translate "Username" %}:</label>
+                                <input type="text" id="login_name" name="login_name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="login_password" class="form-label">{% translate "Password" %}:</label>
+                                <input type="password" id="login_password" name="login_password" class="form-control" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="#get-started" id="login_submit" class="btn btn-outline-primary btn-lg btn-block login-submit">{% translate "Login" %}</a>
+                            </div>
+                        </form>
+                        <p>{% translate "Don't have an account? Create one" %} <a href="#id-signup" class="signup-link">{% translate "Here" %}</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <div id="profile" class="content-section" style="display:none;"></div>
+        
+        <div id="profile-list-page" class="content-section" style="display: none;"></div>
+
+        <div id="id-signup" class="content-section" style="display: none;">
+            <p class="error-message"></p>
+            <form id="signup_form" method="POST" action="{% url 'json_signup' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                    {{ UserCreationForm.as_p }}
+                <a href="#get-started" type="submit" id="signup_submit" class="btn btn-outline-primary btn-lg btn-block signup-submit">{% translate "Sign Up" %}</a>
+            </form>
+            <p>{% translate "Have an account? Log in" %} <a href="#id-login" class="login-link">{% translate "Here" %}</a></p>
+        </div>
+
+        <div id="id-update-user" class="content-section" style="display: none;">
+            <p class="error-message"></p>
+            <p class="success-message"></p>
+            <form id="update_user_form" method="POST" action="{% url 'json_update_user' %}">
+            {% csrf_token %}
+            <div>
+                <h3 style="color:#323131">{% translate 'Edit Username' %}</h3>
+                <br>
+                <label for ="update_username">{% translate "Username" %}:</label>
+                <input type="text" id="update_username" name="update_username" required><br>
+                <label for="update_password1">{% translate "Password" %}:</label>
+                <input type="password" id="update_password1" name="update_password1" required><br>
+                <label for="update_password2">{% translate "Confirm Password" %}:</label>
+                <input type="password" id="update_password2" name="update_password2" required><br>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">{% translate 'Save' %}</button>
+            </div>
+            </form>
+        </div>
+
+        <!-- <div id="id-update-displayname" class="content-section" style="display: none;">
+            <p class="error-message"></p>
+            <p class="success-message"></p>
+            <form id="update_display_name_form" method="POST" action="{% url 'json_update_display_name' %}">
+                {% csrf_token %}
+                <div>
+                    <p><label for="id_display_name">Display Name for Tournaments:</label></p>
+                    <input type="text" name="display_name" maxlength="12" id="id_display_name" required>
+                </div><br><br>
+                <div class="form-group">
+                    <input type="submit" value="Save">
+                </div>
+            </form>
         </div> -->
 
+        <!-- <div id="id-update-avatar" class="content-section" style="display: none;">
+            <p class="error-message"></p>
+            <p class="success-message"></p>
+            <form id="update_avatar_form" method="POST" action="{% url 'json_update_avatar' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+                <div>
+                    <h3 style="color:#323131">{% translate 'Edit Avatar' %}</h3>
+                    <br>
+                </div>
+                {{ UpdateAvatarForm.as_p }}
+                <button type="submit" class="btn btn-primary">{% translate 'Save' %}</button>
+            </form>
+        </div> -->
+
+        <div id="id-update-avatar" class="content-section" style="display: none;">
+            <p class="error-message"></p>
+            <p class="success-message"></p>
+            <form id="update_avatar_form" method="POST" action="{% url 'json_update_avatar' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div>
+                    <h3 style="color:#323131">{% translate 'Edit Avatar' %}</h3>
+                    <br>
+                    <div class="file-upload-wrapper">
+                        <!-- File input -->
+                        <input type="file" id="id_avatar" name="avatar" class="file-upload-input" required>
+                        
+                        <!-- Custom button to trigger file input -->
+                        <button type="button" class="file-upload-button" onclick="document.getElementById('id_avatar').click();">
+                            {% translate "Choose File" %}
+                        </button>
+        
+                        <!-- File name display -->
+                        <span id="file-name" class="file-name">
+                            {% translate "No file chosen" %}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">{% translate 'Save' %}</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+            document.getElementById('id_avatar').addEventListener('change', function() {
+                const fileInput = document.getElementById('id_avatar');
+                const fileNameDisplay = document.getElementById('file-name');
+                
+                if (fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = fileInput.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = "{% translate 'No file chosen' %}";
+                }
+            });
+        </script>
+        
+    
+        
         <!-- Footer -->
         <div class="container" id="footer-welcome">
             <h3 class="text-center">42 {% translate "Berlin" %} | 2024</h3>
         </div>
 
-        
-        <!-- {% block welcome_section %}
-        {% endblock welcome_section %} -->
-        {% endblock tournament %}
-        {% endblock four_pl_game %}
-        {% endblock two_pl_game %}
-        {% endblock offline_game %}
-
-
-        <!-- Different buttons, not in use -->
-
-        <!-- User navigation bar -->
-        <div class="container" id="user-navbar" style="display: none;">
-            <div class="row justify-content-center">
-                <div class="row justify-content-center btn-group">
-                    <button type="button" id="leaderboard" class="btn btn-outline-primary btn-lg">🏆 {% translate "Leaderboard" %}</button>
-                    <button type="button" id="profile" class="btn btn-outline-primary btn-lg">👤 {% translate "Profile" %}</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile navigation bar -->
-        <div class="container" id="user-navbar" style="display: none;">
-            <div class="row justify-content-center">
-                <div class="row justify-content-center btn-group">
-                    <button type="button" id="profile" class="btn btn-outline-primary btn-lg">👈 {% translate "Back to game" %}</button>
-                    <button type="button" id="leaderboard" class="btn btn-outline-primary btn-lg">{% translate "All Players" %}</button>
-                    <button type="button" id="profile" class="btn btn-outline-primary btn-lg">{% translate "Log out" %}</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="container" id="two_players" style="display: none;">
-            <h3 class="text-center">Two players mode</h3>
-        </div>
-        <div class="container" id="tournament" style="display: none;">
-            <h3 class="text-center">Tournament mode</h3>
-        </div>
-
-        <div class="container" id="footer-game" style="display: none;">
-            <h3 class="text-center">Footer game</h3>
-        </div>
-        <!-- Enter your name form -->
-        <form id="name_form" style="display: none;">
-            <div class="form-group">
-                <input type="text" class="form-control" id="player_name1" placeholder="Enter your name">
-            </div>
-            <button type="submit" id="play" class="btn btn-primary">Play!</button>
-        </form>
-
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <!-- Custom JavaScript -->
-    
+    <!-- Variables and translation -->
+    <script>
+		const DEFAULT_AVATAR_URL = "{% static 'avatar/kermit.png' %}";
+        var IS_AUTHENTICATED = "{{ is_authenticated }}";
+
+        const PRESS_ENTER = "{% translate 'Press Enter to Play' %}";
+        const PLAYER = "{% translate 'Player' %}";
+        const ENTER_NAMES = "{% translate 'Enter players names:' %}";
+        const START_GAME = "{% translate 'Start Game' %}";
+        const GAME_OVER = "{% translate 'Game Over! Press Enter to Play Again' %}";
+        const GAME_STARTED = "{% translate 'Game Started' %}";
+        const DIFF_NAMES = "{% translate 'Please enter different names for players.' %}";
+        const WINS = "{% translate 'wins!' %}";
+        const EXIT_GAME = "{% translate 'Exit the game' %}";
+
+        const TOUR = "{% translate 'Tournament' %}";
+        const START_TOUR = "{% translate 'Start Tournament' %}";
+        const NEXT_GAME = "{% translate 'Next Game!' %}";
+        const SAVE_BLOCKCHAIN = "{% translate 'Save Results in Blockchain' %}";
+        const WINS_TOUR = "{% translate 'wins the Tournament!' %}";
+        const SEMI_FIN = "{% translate 'Semi-finals' %}";
+        const MATCH = "{% translate 'Match' %}";
+        const GO_TO_MATCH = "{% translate 'Go to Match' %}";
+        const SUBMIT_ETH = "{% translate 'Submit Transaction to Ethereum Blockchain' %}";
+        const ETH_TEXT = "{% translate 'Submitting a transaction to the Ethereum blockchain will broadcast it to the network for validation by validators. Once confirmed, The Winner is recorded on the blockchain, ensuring transparency and security.' %}";
+        const CONNECT_WALLET = "{% translate 'Connect Wallet' %}";
+        const BLOCKCHAIN_FINALIZE = "{% translate 'Save Tournament Results' %}";
+        const INST_METAMASK = "{% translate 'Please install Metamask' %}";
+        const SUCCESS_TRANSACTION = "{% translate 'Transaction successful! Check it out on' %}";
+        const CONNECTED = "{% translate 'Connected' %}";
+        const AI = "{% translate 'AI player' %}";
+        const HUMAN = "{% translate 'Human' %}";
+        const AI_WON = "{% translate 'AI player Won!' %}";
+        const HUMAN_WON = "{% translate 'Human Won!' %}";
+        
+        const CONF_PASS = "{% translate 'Confirm Password' %}";
+        const FIND_FR = "{% translate 'Find New Friends' %}";
+        const PROF = "{% translate 'Profile' %}";
+        const FR = "{% translate 'Friends' %}";
+        const UID = "{% translate 'User ID' %}";
+        const STATS = "{% translate 'Stats' %}";
+        const MATCH_HIST = "{% translate 'Match History' %}";
+        const YOUR_PROF = "{% translate 'Your Profile' %}";
+        const YOUR_FR = "{% translate 'Your Friends' %}";
+        const YOUR_STATS = "{% translate 'Your Stats' %}";
+        const YOUR_MATCH_HIST = "{% translate 'Your Match History' %}";
+        const WINS_PROF = "{% translate 'Wins' %}";
+        const LOSSES = "{% translate 'Losses' %}";
+        const DATE_PROF = "{% translate 'Date' %}";
+        const WINNER = "{% translate 'Winner' %}";
+        const LOOSER = "{% translate 'Looser' %}";
+        const TOT_GAMES = "{% translate 'Total Games' %}";
+        const STATUS = "{% translate 'Status' %}";
+        const OFFLINE = "{% translate 'Offline' %}";
+        const ONLINE = "{% translate 'Online' %}";
+        const BEFR = "{% translate 'Befriend' %}";
+        const UNFR = "{% translate 'Unfriend' %}";
+        const EDIT_USERNAME = "{% translate 'Edit Username' %}";
+        const EDIT_AVATAR = "{% translate 'Edit Avatar' %}";
+        const USERNAME = "{% translate 'Username' %}";
+        const SAVE = "{% translate 'Save' %}";
+        const REG_USR = "{% translate 'Registered Users' %}";
+
+        const WAIT = "{% translate 'Waiting for players to join' %}";
+        const WAIT_REJOIN = "{% translate 'Wait for the opponent to rejoin' %}";
+        const JOINED = "{% translate 'joined the game' %}";
+        const REJOINED = "{% translate 'rejoined the game' %}";
+        const REDIR = "{% translate 'Player already joined the game. You will be redirected' %}";
+        const NO_SESSION = "{% translate 'Connection closed: no available game session' %}";
+        const CON_CLOSED = "{% translate 'Connection closed for unauthenticated user' %}";
+        const REDIR_HOME = "{% translate 'You will be redirected to the home page' %}";
+        const ERR = "{% translate 'An error occurred. Please refresh the page' %}";
+        const STARTED = "{% translate 'Game Started' %}";
+        const GET_READY = "{% translate 'Players joined. Get ready!' %}";
+        const OUT = "{% translate 'Out of bounds!' %}";
+        const GOAL = "{% translate 'Goal!' %}";
+        const WON = "{% translate 'Won' %}"
+        const GAME_OVER2 = "{% translate 'Game Over!' %}"
+        const WELCOME = "{% translate 'Welcome' %}"
+        const WAITING_TOUR = "{% translate 'Waiting for player' %}"
+        const FINAL_TOUR = "{% translate 'Final Match' %}"
+        const ALREADY_TOUR = "{% translate 'Player already in tournament, you may return to home page' %}"
+        const FULL_TOUR = "{% translate 'Tournament is full at the moment, you may return to home page' %}"
+	</script>
 </body>
 </html>
