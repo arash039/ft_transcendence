@@ -7,6 +7,8 @@ This README mainly focuses on two main aspects of the Pong 3.0 project. First th
 
 ### Remote Player Game
 
+[Tournament view](#19.08.2024_17.11.50_REC-ezgif.com-video-to-gif-converter(1).gif)
+
 #### 1. The Game Flow: Connecting, Playing, and Updating State
 
 At the core of this project is the `PongConsumer` class, which manages all WebSocket interactions and game logic. When a player connects, the consumer establishes a WebSocket connection and verifies whether they are reconnecting to an existing session or joining a new one. The consumer then assigns the player to an active game session or creates a new session if needed.
