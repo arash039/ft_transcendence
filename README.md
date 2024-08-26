@@ -7,7 +7,7 @@ This README mainly focuses on two main aspects of the Pong 3.0 project. First th
 
 ### Remote Player Game
 
-[Tournament view](#19.08.2024_17.11.50_REC-ezgif.com-video-to-gif-converter(1).gif)
+![Tournament view](https://github.com/arash039/ft_transcendence/blob/main/19.08.2024_17.11.50_REC-ezgif.com-video-to-gif-converter(1).gif)
 
 #### 1. The Game Flow: Connecting, Playing, and Updating State
 
