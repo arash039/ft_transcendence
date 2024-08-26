@@ -1,7 +1,7 @@
 # Pong Game Remote Player and DevOps Modules
 
 ## Overview
-Pong 3.0 game consists of two main parts: users without registering can play the game either againts another user, or against an AI opponent on the "same machine", and if they register they can log in and play against remote players. Remote play has three main features: two players mode, four players mode, and an online tournament where 4 players can play two by two in a tournamnet to see who will be the champion.
+Pong 3.1 game consists of two main parts: users without registering can play the game either againts another user, or against an AI opponent on the "same machine", and if they register they can log in and play against remote players. Remote play has three main features: two players mode, four players mode, and an online tournament where 4 players can play two by two in a tournamnet to see who will be the champion.
 
 This README mainly focuses on two main aspects of the Pong 3.0 project. First the [Remote Player Game](#remote-player-game) is discussed and then in the [DevOps](#devops) section it demonstrates how ELK stack is used for log management, and Prometheus and Grafana are integrated to provide robust monitoring and performance visualization.
 
