@@ -20,6 +20,7 @@ DOCKER_COMPOSE_PATH="./docker-compose.yml"
 all : build up
 
 build:
+	# @$$(cp -n /home/ole/Desktop/.env .) 
 	docker compose -f ./docker-compose.yml build --no-cache
 
 up :
