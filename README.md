@@ -5,36 +5,36 @@ Pong 3.1 game consists of two main parts: users without registering can play the
 
 This README mainly focuses on two main aspects of the Pong 3.1 project. First the [Remote Player Game](#remote-player-game) is discussed and then in the [DevOps](#devops) section it demonstrates how ELK stack is used for log management, and Prometheus and Grafana are integrated to provide robust monitoring and performance visualization.
 
-### Remote Player Game
+## Remote Player Game
 
 ![Tournament view](https://github.com/arash039/ft_transcendence/blob/main/19.08.2024_17.11.50_REC-ezgif.com-video-to-gif-converter(1).gif)
 
-#### 1. The Game Flow: Connecting, Playing, and Updating State
+### 1. The Game Flow: Connecting, Playing, and Updating State
 
 At the core of this project is the `PongConsumer` class, which manages all WebSocket interactions and game logic. When a player connects, the consumer establishes a WebSocket connection and verifies whether they are reconnecting to an existing session or joining a new one. The consumer then assigns the player to an active game session or creates a new session if needed.
 
 Upon establishing a connection, players can start moving their paddles. The game continuously sends and receives data to and from each player to maintain synchronization. Paddle positions, ball movements, and scores are all tracked in real-time. The backend continuously calculates these updates, considering player actions and collision events, before broadcasting the updated state to all connected players.
-#### 2. Real-Time Synchronization and Game Management
+### 2. Real-Time Synchronization and Game Management
 
 The game state is maintained through various data structures. A dictionary called game_sessions tracks ongoing sessions, storing each session’s player details, game state (e.g., ball and paddle positions, scores), and the ongoing game loop task. The game loop runs at a specified frames-per-second (FPS) rate, ensuring the game logic, including ball movement and collision detection, is executed smoothly.
 
 If a player disconnects, the consumer registers the disconnection and marks a timeout for possible reconnection. The disconnected_players dictionary and the rejoin_timeout variable work together to manage the player’s re-entry window. Should a player return within the allowed time, they can seamlessly rejoin the game where they left off.
-#### 3. Handling Game Events: Starting, Pausing, and Ending Games
+### 3. Handling Game Events: Starting, Pausing, and Ending Games
 
 From the moment both players are ready, the game initiates a countdown using the `start_game_countdown()` method. Once the countdown completes, the game loop begins. This loop is the heart of the game, handling ball movement calculations, paddle interactions, and collisions. The game progresses until a player reaches the winning score, at which point the game declares the winner and terminates the session.
 
 Additionally, various event-based messages are broadcasted to the clients, such as when both players join, when one player rejoins after a disconnection, and when the game concludes. The backend is designed to notify users of these key events using the respective methods like `player_joined()`, `game_started()`, and `game_over()`.
-#### 4. Transitioning to Tournaments: Managing Multiple Games
+### 4. Transitioning to Tournaments: Managing Multiple Games
 
 While the individual Pong game sessions are engaging on their own, the project extends this by offering a tournament mode. Here, players can join and compete in a bracketed tournament, with matches progressing until a champion is crowned.
 
 The tournament-specific consumer, `TournamentConsumer`, coordinates the entire process. Upon connecting, players are added to the tournament bracket, and WebSocket communication ensures the tournament chart is constantly updated for all participants. Once two players of a match are present a "Go To Match" button appears and by clicking on that player is directed to the game page. When a match begins, players are directed to their game session, where the same core game logic is applied. As matches conclude, the tournament consumer updates the standings and prepares the next round.
-#### 5. Frontend-Backend Coordination: A Smooth User Experience
+### 5. Frontend-Backend Coordination: A Smooth User Experience
 
 The frontend, built primarily with JavaScript, plays a crucial role in managing user interactions and rendering game visuals. The game UI is rendered dynamically, responding to game state updates received over WebSocket. Functions like `startGame(sessionId, oldSocket)` in tour_game.js manage the initialization of the WebSocket connection, while handlers like `updateGameState(state)` ensure the visuals stay in sync with the backend.
 
 In the tournament setup (tour.js), the frontend coordinates actions like starting the tournament and navigating between matches. It listens for updates and user actions, pushing commands back to the backend for processing, whether it’s updating the tournament chart or navigating players to their next match.
-#### 6. Error Handling and Robustness
+### 6. Error Handling and Robustness
 
 The system is designed to handle common issues like network disruptions, errors during state updates, and unexpected disconnections. The consumer logs these events, ensuring the system can respond gracefully. For instance, if a player disconnects mid-game, the consumer tracks the disconnection and offers a reconnection window. The backend ensures that state errors don’t crash the game loop, allowing the match to continue seamlessly.
 
